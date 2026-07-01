@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pet box</title>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="petbox.css">
+   <style>
+     .status-pill{ cursor:pointer; user-select:none; transition:transform .15s ease, filter .15s ease; }
+     .status-pill:hover{ filter:brightness(1.15); transform:scale(1.06); }
+     .status-pill:active{ transform:scale(0.96); }
+   </style>
+</head> 
+<body>
+    <canvas id="bg-canvas"></canvas>
+ 
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="home.html" class="nav-logo">🐾 Paw House</a>
+  <a href="home.html" class="nav-back">← Back to Pets</a>
+</nav>
+ 
+<div class="page">
+ 
+  <!-- ① PET HERO — edit name, breed, photo, chips per pet -->
+  <div class="pet-hero">
+    <img src="bruno.png" alt="Bruno">
+    <div class="pet-hero-info">
+      <h1>Bruno</h1>
+      <div class="breed">Labrador Retriever</div>
+      <div class="pet-chips">
+        <span class="chip orange">Dog</span>
+        <span class="chip purple">Male</span>
+        <span class="chip blue">2 yrs</span>
+        <span class="chip pink">20 kg</span>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- ② VACCINATION SCHEDULE — edit rows per pet -->
+ 
+  <div class="sec">
+    <div class="sec-title"><span class="icon">💉</span> Vaccination Schedule</div>
+    <table class="sched-table">
+      <thead>
+        <tr>
+          <th>Vaccine</th>
+          <th class="col-status">Status</th>
+          <th class="col-date">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>DHPPi (Core Vaccine)</td>
+          <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
+          <td class="col-date">12 Jan 2024</td>
+        </tr>
+        <tr>
+          <td>Rabies</td>
+          <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
+          <td class="col-date">12 Jan 2024</td>
+        </tr>
+        <tr>
+          <td>Leptospirosis</td>
+          <td><span class="status-pill due" onclick="cycleStatus(this)" title="Tap to mark as done">Due</span></td>
+          <td class="col-date">15 Jul 2025</td>
+        </tr>
+        <tr>
+          <td>Booster Dose</td>
+          <td><span class="status-pill miss" onclick="cycleStatus(this)" title="Tap to mark as done">Missed</span></td>
+          <td class="col-date">01 Mar 2025</td>
+        </tr>
+        <!-- Add more rows:
+        <tr>
+          <td>Vaccine Name</td>
+          <td><span class="status-pill due">Due</span></td>
+          <td class="col-date">DD Mon YYYY</td>
+        </tr>
+        -->
+      </tbody>
+    </table>
+  </div>
+ 
+  <!-- ③ DEWORMING SCHEDULE — edit rows per pet -->
+  <div class="sec">
+    <div class="sec-title"><span class="icon">🐛</span> Deworming Schedule</div>
+    <table class="sched-table">
+      <thead>
+        <tr>
+          <th>Treatment</th>
+          <th class="col-status">Status</th>
+          <th class="col-date">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1st Deworming</td>
+          <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
+          <td class="col-date">10 Feb 2024</td>
+        </tr>
+        <tr>
+          <td>2nd Deworming</td>
+          <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
+          <td class="col-date">10 May 2024</td>
+        </tr>
+        <tr>
+          <td>Quarterly Deworming</td>
+          <td><span class="status-pill due" onclick="cycleStatus(this)" title="Tap to mark as done">Due</span></td>
+          <td class="col-date">10 Aug 2025</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+ 
+  <!-- ④ DIET CHART — edit meals per pet -->
+  <div class="sec">
+    <div class="sec-title"><span class="icon">🥗</span> Diet Chart</div>
+    <div class="diet-grid">
+      <div class="diet-card">
+        <div class="meal">🌅 Morning</div>
+        <div class="items">Royal Canin Labrador kibble<br>Boiled egg (1 whole)</div>
+        <div class="qty">300g kibble · 7:00 AM</div>
+      </div>
+      <div class="diet-card">
+        <div class="meal">☀️ Afternoon</div>
+        <div class="items">Boiled chicken breast<br>Plain rice<br>Steamed carrots</div>
+        <div class="qty">200g total · 1:00 PM</div>
+      </div>
+      <div class="diet-card">
+        <div class="meal">🌙 Evening</div>
+        <div class="items">Royal Canin Labrador kibble<br>Fresh water (always)</div>
+        <div class="qty">300g kibble · 7:00 PM</div>
+      </div>
+      <div class="diet-card">
+        <div class="meal">🍖 Treats</div>
+        <div class="items">Pedigree dentastix<br>Small piece of fruit</div>
+        <div class="qty">Max 2 treats/day</div>
+      </div>
+      <!-- Add more meal cards:
+      <div class="diet-card">
+        <div class="meal">🕐 Meal Name</div>
+        <div class="items">Food item<br>Food item</div>
+        <div class="qty">Amount · Time</div>
+      </div>
+      -->
+    </div>
+  </div>
+ 
+  <!-- ⑤ AUDIO CALL — coming soon -->
+  <div class="sec">
+    <div class="sec-title">
+      <span class="icon">📞</span> Audio Call with Us
+      <span class="badge-soon">Coming Soon</span>
+    </div>
+    <div class="coming-soon-wrap">
+      <div class="cs-icon">🎙️</div>
+      <div class="cs-title">Talk to our pet care team</div>
+      <div class="cs-sub">Book a live audio call with our vets and caretakers — directly from your pet's box. We're working on it!</div>
+      <div class="cs-pill">🚀 Launching Soon</div>
+    </div>
+  </div>
+ 
+  <!-- ⑥ GALLERY — add <img> tags for each photo -->
+  <div class="sec">
+    <div class="sec-title"><span class="icon">📸</span> Memories & Gallery</div>
+    <div class="gallery-grid">
+      <img src="bruno.png" alt="Bruno memory" onclick="openLightbox(this.src)">
+      <!-- Add more photos here:
+      <img src="photo2.jpg" alt="..." onclick="openLightbox(this.src)">
+      <img src="photo3.jpg" alt="..." onclick="openLightbox(this.src)">
+      -->
+    </div>
+    <!-- If no photos yet, use this instead:
+    <div class="gallery-empty">No memories added yet 🐾 — photos will appear here soon.</div>
+    -->
+  </div>
+ 
+</div><!-- /page -->
+ 
+<footer class="footer">
+  <p>© <span id="year"></span> Paw House. Made with 🐾 for happy pets.</p>
+</footer>
+ 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+ 
+<script>
+  /* ===== BACKGROUND CANVAS ===== */
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const FOCAL = 560;
+  const COLS = [[244,162,77],[224,123,123],[201,111,208],[100,160,255]];
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function mkRing(i){ const col=COLS[i%COLS.length]; return {radius:180+i*70,tilt:(i*0.6)+Math.random()*0.4,spin:(Math.random()-.5)*0.012+0.004,rot:Math.random()*Math.PI*2,points:64,col,nodeOffset:Math.random()*Math.PI*2}; }
+  let rings=[];
+  function init(){ rings=Array.from({length:6},(_,i)=>mkRing(i)); }
+  let mouse={tx:0,ty:0.25}, camRotY=0, camRotX=0.25;
+  function project3D(x,y,z){ const cosY=Math.cos(camRotY),sinY=Math.sin(camRotY); let x1=x*cosY-z*sinY,z1=x*sinY+z*cosY; const cosX=Math.cos(camRotX),sinX=Math.sin(camRotX); let y1=y*cosX-z1*sinX,z2=y*sinX+z1*cosX; const scale=FOCAL/(FOCAL+z2+500); return{sx:W*.5+x1*scale,sy:H*.5+y1*scale,scale,z:z2}; }
+  function drawBlobs(t){ [{cx:W*.30+Math.sin(t*.30)*110,cy:H*.42+Math.cos(t*.20)*75,r:320,col:'244,162,77',a:.07},{cx:W*.72+Math.cos(t*.25)*90,cy:H*.60+Math.sin(t*.32)*65,r:250,col:'201,111,208',a:.07},{cx:W*.52+Math.sin(t*.18)*70,cy:H*.24+Math.cos(t*.22)*55,r:190,col:'100,160,255',a:.05}].forEach(({cx,cy,r,col,a})=>{ const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r); g.addColorStop(0,`rgba(${col},${a})`); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }); }
+  function drawVignette(){ const g=ctx.createRadialGradient(W/2,H/2,H*.06,W/2,H/2,H*.80); g.addColorStop(0,'rgba(13,15,20,0)'); g.addColorStop(1,'rgba(13,15,20,.85)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
+  let t=0;
+  function animate(){ requestAnimationFrame(animate); t+=.007; camRotY+=(mouse.tx-camRotY)*.02; camRotX+=(mouse.ty-camRotX)*.02; ctx.fillStyle='#0d0f14'; ctx.fillRect(0,0,W,H); drawBlobs(t); const drawables=[]; rings.forEach(ring=>{ ring.rot+=ring.spin; const pts=[]; for(let p=0;p<=ring.points;p++){ const a=(p/ring.points)*Math.PI*2; const rx=Math.cos(a)*ring.radius,ry=Math.sin(a)*ring.radius*Math.sin(ring.tilt),rz=Math.sin(a)*ring.radius*Math.cos(ring.tilt); const cs=Math.cos(ring.rot),sn=Math.sin(ring.rot); pts.push(project3D(rx*cs-rz*sn,ry,rx*sn+rz*cs)); } const avgZ=pts.reduce((s,p)=>s+p.z,0)/pts.length; drawables.push({ring,pts,avgZ}); const na=ring.nodeOffset+t*1.3; const nrx=Math.cos(na)*ring.radius,nry=Math.sin(na)*ring.radius*Math.sin(ring.tilt),nrz=Math.sin(na)*ring.radius*Math.cos(ring.tilt); const cs=Math.cos(ring.rot),sn=Math.sin(ring.rot); const node=project3D(nrx*cs-nrz*sn,nry,nrx*sn+nrz*cs); drawables.push({node,ring,avgZ:node.z,isNode:true}); }); drawables.sort((a,b)=>a.avgZ-b.avgZ); drawables.forEach(d=>{ if(d.isNode){ const{node,ring}=d; const depth=Math.max(0,Math.min(1,(node.z+500)/900)); const r=3+depth*4,alpha=.25+depth*.6; const halo=ctx.createRadialGradient(node.sx,node.sy,0,node.sx,node.sy,r*4); halo.addColorStop(0,`rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${(alpha*.5).toFixed(3)})`); halo.addColorStop(1,'transparent'); ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(node.sx,node.sy,r*4,0,Math.PI*2); ctx.fill(); ctx.fillStyle=`rgba(255,255,255,${alpha.toFixed(3)})`; ctx.beginPath(); ctx.arc(node.sx,node.sy,Math.max(r,1),0,Math.PI*2); ctx.fill(); } else { const{ring,pts}=d; const depth=Math.max(0,Math.min(1,(d.avgZ+500)/900)); ctx.beginPath(); ctx.strokeStyle=`rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${(.08+depth*.22).toFixed(3)})`; ctx.lineWidth=.8+depth*1.2; pts.forEach((p,idx)=>idx===0?ctx.moveTo(p.sx,p.sy):ctx.lineTo(p.sx,p.sy)); ctx.stroke(); } }); drawVignette(); }
+  window.addEventListener('mousemove',e=>{ mouse.tx=((e.clientX/W)-.5)*0.6; mouse.ty=0.25+((e.clientY/H)-.5)*0.4; });
+  window.addEventListener('mouseleave',()=>{ mouse.tx=0; mouse.ty=0.25; });
+  resize(); init(); animate();
+  window.addEventListener('resize',()=>{ resize(); init(); });
+ 
+  /* ===== STATUS PILL — tap to mark done / undo ===== */
+  function cycleStatus(el) {
+    const row = el.closest('tr');
+    const dateCell = row ? row.querySelector('.col-date') : null;
+    if (el.classList.contains('done')) {
+      // Undo — revert back to Due
+      el.classList.remove('done');
+      el.classList.add('due');
+      el.textContent = 'Due';
+      el.title = 'Tap to mark as done';
+    } else {
+      // Mark as Done — stamp today's date
+      el.classList.remove('due', 'miss');
+      el.classList.add('done');
+      el.textContent = 'Done';
+      el.title = 'Tap to update';
+      if (dateCell) {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateCell.textContent = `${dd} ${months[today.getMonth()]} ${today.getFullYear()}`;
+      }
+    }
+  }
+
+  /* ===== FOOTER YEAR ===== */
+  document.getElementById('year').textContent = new Date().getFullYear();
+ 
+  /* ===== LIGHTBOX ===== */
+  function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

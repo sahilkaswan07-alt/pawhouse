@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paw House</title>
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+ 
+  <!-- STEP 2: MAIN LANDING BACKGROUND & CONTENT -->
+  <canvas id="bg-canvas"></canvas>
+ 
+  <div class="page">
+    <section class="hero">
+      <div class="premium-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 9l-5.2 4.4L17.4 21 12 17.3 6.6 21l1.6-7.6L3 9l6.6-.4L12 2z"/></svg>
+        Premium Pet House
+      </div>
+   
+      <div class="hero-glass">
+        <div class="paw-icon">🐾</div>
+        <h1 class="brand">Paw House</h1>
+        <p class="tagline">A House Away From Home</p>
+        <p class="tagline">a community that treat every pet like a family member</p>
+        <a href="registration.html" class="btn-register">Register Now</a>
+   
+        <div class="stats-strip">
+          <div class="stat-item">
+            <div class="stat-num">2,400+</div>
+            <div class="stat-label">Pets Hosted</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">4.9★</div>
+            <div class="stat-label">Avg Rating</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">24/7</div>
+            <div class="stat-label">Care & Support</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">12 yrs</div>
+            <div class="stat-label">Of Experience</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+   
+  <!-- Dynamic Left Corner (Dogs Loop) -->
+  <div class="pet-corner left">
+    <div class="pet-img-wrap">
+      <div class="pet-img-tilt">
+        <img class="pet-img active" src="bomby.png" alt="Dog 1">
+        <img class="pet-img" src="monty.png" alt="Dog 2">
+        <img class="pet-img" src="dog pet 3.png" alt="Dog 3">
+        <img class="pet-img" src="bruno.png" alt="Dog 4">
+      </div>
+    </div>
+  </div>
+   
+  <!-- Dynamic Right Corner (Cats Loop) -->
+  <div class="pet-corner right">
+    <div class="pet-img-wrap">
+      <div class="pet-img-tilt">
+        <img class="pet-img active" src="caty.png" alt="Cat 1">
+        <img class="pet-img" src="cat pet 2.png" alt="Cat 2">
+        <img class="pet-img" src="pili.png" alt="Cat 3">
+        <img class="pet-img" src="cat pet 4.png" alt="Cat 4">
+      </div>
+    </div>
+  </div>
+   
+  <!-- Why Join Us Button -->
+  <div class="why-btn-wrap">
+    <button class="btn-why" onclick="openModal()">❓ Why Join Us?</button>
+  </div>
+   
+  <!-- Why Join Modal -->
+  <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <h2>Why Join Paw House? 🐾</h2>
+      <div class="reason">
+        <div class="reason-icon">🏠</div>
+        <div>
+          <h3>A True Home for Your Pet</h3>
+          <p>We treat every pet like family — cozy spaces, real love, and daily routines that keep tails wagging.</p>
+        </div>
+      </div>
+      <div class="reason">
+        <div class="reason-icon">🩺</div>
+        <div>
+          <h3>Vet-Verified Care</h3>
+          <p>Our caregivers are trained and vetted. Your pet's health and safety is our first priority, always.</p>
+        </div>
+      </div>
+      <div class="reason">
+        <div class="reason-icon">📸</div>
+        <div>
+          <h3>Live Updates & Photos</h3>
+          <p>Get real-time photos and updates so you can relax knowing your furry friend is happy.</p>
+        </div>
+      </div>
+      <div class="reason">
+        <div class="reason-icon">🐶🐱</div>
+        <div>
+          <h3>Dogs & Cats Welcome</h3>
+          <p>Purpose-built spaces for both dogs and cats, with separate zones and loads of playtime.</p>
+        </div>
+      </div>
+      <div class="reason">
+        <div class="reason-icon">💛</div>
+        <div>
+          <h3>Community of Pet Lovers</h3>
+          <p>Join thousands of pet parents who trust Paw House — because pets deserve the best when you're away.</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">Got It — Register Now 🐾</button>
+    </div>
+  </div>
+   
+  <script>
+    // System to trigger transition between welcome screen and landing page
+    function dismissWelcome() {
+      document.getElementById('welcomeIntro').classList.add('dismissed');
+    }
+
+    const canvas = document.getElementById('bg-canvas');
+    const ctx    = canvas.getContext('2d');
+     
+    let W, H;
+    const FOCAL = 560;
+     
+    const COLS = [
+      [244,162, 77],
+      [224,123,123],
+      [201,111,208],
+      [100,160,255],
+    ];
+     
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+     
+    function mkRing(i) {
+      const col = COLS[i % COLS.length];
+      return {
+        radius: 180 + i * 70,
+        tilt:   (i * 0.6) + Math.random() * 0.4,
+        spin:   (Math.random() - .5) * 0.012 + 0.004,
+        rot:    Math.random() * Math.PI * 2,
+        points: 64,
+        col,
+        nodeOffset: Math.random() * Math.PI * 2,
+      };
+    }
+     
+    let rings = [];
+    function init() {
+      rings = Array.from({length: 6}, (_, i) => mkRing(i));
+    }
+     
+    let mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+    let camRotY = 0, camRotX = 0.25;
+     
+    function project3D(x, y, z) {
+      const cosY = Math.cos(camRotY), sinY = Math.sin(camRotY);
+      let x1 = x * cosY - z * sinY;
+      let z1 = x * sinY + z * cosY;
+     
+      const cosX = Math.cos(camRotX), sinX = Math.sin(camRotX);
+      let y1 = y * cosX - z1 * sinX;
+      let z2 = y * sinX + z1 * cosX;
+     
+      const scale = FOCAL / (FOCAL + z2 + 500);
+      return {
+        sx: W * .5 + x1 * scale,
+        sy: H * .5 + y1 * scale,
+        scale,
+        z: z2,
+      };
+    }
+     
+    function drawBlobs(t) {
+      const blobs = [
+        { cx: W*.30 + Math.sin(t*.30)*110, cy: H*.42 + Math.cos(t*.20)*75, r: 320, col:'244,162,77', a:.07 },
+        { cx: W*.72 + Math.cos(t*.25)* 90, cy: H*.60 + Math.sin(t*.32)*65, r: 250, col:'201,111,208',a:.07 },
+        { cx: W*.52 + Math.sin(t*.18)* 70, cy: H*.24 + Math.cos(t*.22)*55, r: 190, col:'100,160,255',a:.05 },
+      ];
+      blobs.forEach(({cx,cy,r,col,a}) => {
+        const g = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+        g.addColorStop(0, `rgba(${col},${a})`);
+        g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      });
+    }
+     
+    function drawVignette() {
+      const g = ctx.createRadialGradient(W/2,H/2,H*.06,W/2,H/2,H*.80);
+      g.addColorStop(0,'rgba(13,15,20,0)');
+      g.addColorStop(1,'rgba(13,15,20,.85)');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    }
+     
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += .007;
+     
+      camRotY += (mouse.tx - camRotY) * .02;
+      camRotX += (mouse.ty - camRotX) * .02;
+     
+      ctx.fillStyle = '#0d0f14';
+      ctx.fillRect(0,0,W,H);
+      drawBlobs(t);
+     
+      const drawables = [];
+     
+      rings.forEach(ring => {
+        ring.rot += ring.spin;
+        const pts = [];
+        for (let p = 0; p <= ring.points; p++) {
+          const a = (p / ring.points) * Math.PI * 2;
+          const rx = Math.cos(a) * ring.radius;
+          const ry = Math.sin(a) * ring.radius * Math.sin(ring.tilt);
+          const rz = Math.sin(a) * ring.radius * Math.cos(ring.tilt);
+     
+          const cs = Math.cos(ring.rot), sn = Math.sin(ring.rot);
+          const fx = rx * cs - rz * sn;
+          const fz = rx * sn + rz * cs;
+     
+          pts.push(project3D(fx, ry, fz));
+        }
+        const avgZ = pts.reduce((s,p)=>s+p.z,0) / pts.length;
+        drawables.push({ ring, pts, avgZ });
+     
+        const na = ring.nodeOffset + t * 1.3;
+        const nrx = Math.cos(na) * ring.radius;
+        const nry = Math.sin(na) * ring.radius * Math.sin(ring.tilt);
+        const nrz = Math.sin(na) * ring.radius * Math.cos(ring.tilt);
+        const cs = Math.cos(ring.rot), sn = Math.sin(ring.rot);
+        const nfx = nrx * cs - nrz * sn;
+        const nfz = nrx * sn + nrz * cs;
+        const node = project3D(nfx, nry, nfz);
+        drawables.push({ node, ring, avgZ: node.z, isNode: true });
+      });
+     
+      drawables.sort((a,b) => a.avgZ - b.avgZ);
+     
+      drawables.forEach(d => {
+        if (d.isNode) {
+          const { node, ring } = d;
+          const depth = Math.max(0, Math.min(1, (node.z + 500) / 900));
+          const r = (3 + depth * 4);
+          const alpha = .25 + depth * .6;
+          const halo = ctx.createRadialGradient(node.sx, node.sy, 0, node.sx, node.sy, r*4);
+          halo.addColorStop(0, `rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${(alpha*.5).toFixed(3)})`);
+          halo.addColorStop(1, 'transparent');
+          ctx.fillStyle = halo;
+          ctx.beginPath(); ctx.arc(node.sx, node.sy, r*4, 0, Math.PI*2); ctx.fill();
+     
+          ctx.fillStyle = `rgba(255,255,255,${(alpha).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(node.sx, node.sy, Math.max(r,1), 0, Math.PI*2); ctx.fill();
+        } else {
+          const { ring, pts } = d;
+          const depth = Math.max(0, Math.min(1, (d.avgZ + 500) / 900));
+          const alpha = .08 + depth * .22;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${alpha.toFixed(3)})`;
+          ctx.lineWidth = .8 + depth * 1.2;
+          pts.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.sx, p.sy) : ctx.lineTo(p.sx, p.sy));
+          ctx.stroke();
+        }
+      });
+     
+      drawVignette();
+    }
+     
+    canvas.addEventListener('mousemove', e => {
+      mouse.tx = ((e.clientX / W) - .5) * 0.6;
+      mouse.ty = 0.25 + ((e.clientY / H) - .5) * 0.4;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse.tx = 0; mouse.ty = 0.25; });
+     
+    canvas.addEventListener('click', e => {
+      canvas.style.pointerEvents = 'none';
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el && el !== canvas) el.click();
+      setTimeout(() => canvas.style.pointerEvents = 'all', 0);
+    });
+     
+    // Mouse tracking vectors for pet orientation sways
+    const petWraps = document.querySelectorAll('.pet-img-wrap');
+    window.addEventListener('mousemove', (e) => {
+      const mx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const my = (e.clientY / window.innerHeight - 0.5) * 2;
+      petWraps.forEach(el => {
+        el.style.setProperty('--tiltY', (mx * 12).toFixed(2) + 'deg');
+        el.style.setProperty('--tiltX', (-my * 8).toFixed(2) + 'deg');
+      });
+    });
+
+    // Carousel loops for cycling pet species images
+    function setupPetRotation(cornerSelector) {
+      const images = document.querySelectorAll(`${cornerSelector} .pet-img`);
+      let currentIndex = 0;
+
+      setInterval(() => {
+        images[currentIndex].classList.remove('active');
+        currentIndex = (currentIndex + 1) % images.length;
+        images[currentIndex].classList.add('active');
+      }, 4500);
+    }
+
+    setupPetRotation('.pet-corner.left');
+    setupPetRotation('.pet-corner.right');
+     
+    function openModal()  { document.getElementById('modal').classList.add('open'); }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+    function closeModalOutside(e) { if (e.target === document.getElementById('modal')) closeModal(); }
+     
+    resize();
+    init();
+    animate();
+    window.addEventListener('resize', () => { resize(); init(); });
+  </script>
+</body>
+</html>

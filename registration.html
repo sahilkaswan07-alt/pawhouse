@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration now</title>
+    <link rel="stylesheet" href="registration.css">
+</head>
+<body>
+      <div class="wrap">
+  <div class="header">
+    <div class="premium-badge">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 9l-5.2 4.4L17.4 21 12 17.3 6.6 21l1.6-7.6L3 9l6.6-.4L12 2z"/></svg>
+      Pet Registration
+    </div>
+    <h1>Register Your Pet</h1>
+    <p>Join the Paw House family in just a couple of minutes 🐾</p>
+  </div>
+ 
+  <div class="progress" id="progress">
+    <div class="dot active" data-step="1"></div>
+    <div class="bar" data-bar="1"></div>
+    <div class="dot" data-step="2"></div>
+    <div class="bar" data-bar="2"></div>
+    <div class="dot" data-step="3"></div>
+  </div>
+ 
+  <div class="card">
+ 
+    <!-- STEP 1: DETAILS -->
+    <form id="step1" class="step active" novalidate>
+      <div class="field" id="f-ownerName">
+        <label>Owner Name</label>
+        <input type="text" name="ownerName" placeholder="e.g. Sahil Choudhary" autocomplete="name">
+        <div class="err">Please enter the owner's name.</div>
+      </div>
+ 
+      <div class="field" id="f-ownerContact">
+        <label>Owner Contact No.</label>
+        <input type="tel" name="ownerContact" placeholder="e.g. 98765 43210" autocomplete="tel">
+        <div class="err">Please enter a valid 10-digit contact number.</div>
+      </div>
+ 
+      <div class="field" id="f-petName">
+        <label>Pet Name</label>
+        <input type="text" name="petName" placeholder="e.g. Bruno">
+        <div class="err">Please enter your pet's name.</div>
+      </div>
+ 
+      <div class="row2">
+        <div class="field" id="f-petBreed">
+          <label>Pet Breed</label>
+          <input type="text" name="petBreed" placeholder="e.g. Labrador">
+          <div class="err">Please enter the breed.</div>
+        </div>
+        <div class="field" id="f-petAge">
+          <label>Pet Age</label>
+          <div class="row2" style="gap:8px;">
+            <input type="number" name="petAge" placeholder="e.g. 2" min="0" max="600" style="flex:1;">
+            <select name="petAgeUnit" style="flex:0 0 110px;">
+              <option value="Years" selected>Years</option>
+              <option value="Months">Months</option>
+            </select>
+          </div>
+          <div class="err">Please enter a valid age.</div>
+        </div>
+      </div>
+ 
+      <div class="field" id="f-petSex">
+        <label>Pet Sex</label>
+        <select name="petSex">
+          <option value="" selected disabled>Select sex</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        <div class="err">Please select your pet's sex.</div>
+      </div>
+ 
+      <div class="field" id="f-petPhoto">
+        <label>Pet Photo</label>
+        <div class="photo-drop" id="photoDrop">
+          <div class="ph-icon">📷</div>
+          <div class="ph-text">Tap to upload your pet's photo</div>
+          <input type="file" name="petPhoto" id="petPhoto" accept="image/*">
+        </div>
+        <img class="photo-preview" id="photoPreview" alt="Pet preview">
+        <div class="err">Please upload a photo of your pet.</div>
+      </div>
+ 
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" onclick="goToPayment()">Continue to Payment →</button>
+      </div>
+    </form>
+ 
+    <!-- STEP 2: PAYMENT -->
+    <div id="step2" class="step">
+      <div class="pay-summary" id="summaryBox"></div>
+ 
+      <div class="qr-box">
+        <img id="qrImg" src="phonepay.png" alt="Scan to pay">
+        <div class="upi-line">Scan with any UPI app &middot; Pay to <b id="upiIdDisplay">your-upi-id@bank</b></div>
+      </div>
+     <!--`  <div class="qr-note">
+        ⚠️ This QR currently uses a <b>placeholder UPI ID</b>. Replace <code>UPI_ID</code> in the script with your real UPI ID before going live, or payment will not reach you.
+      </div>-->
+ 
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+        <button type="button" class="btn btn-primary" id="paidBtn" onclick="submitRegistration()">I've Paid ₹7 — Complete</button>
+      </div>
+      <div class="send-status" id="sendStatus"></div>
+    </div>
+ 
+    <!-- STEP 3: SUCCESS -->
+    <div id="step3" class="step">
+      <div class="success">
+        <div class="check">
+          <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h2>Registration Complete!</h2>
+        <p>Welcome to the Paw House family 🐾<br>A confirmation has been sent to our team and we'll be in touch shortly.</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='home.html'">Go to Home</button>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script>
+  /* ===================== CONFIG — EDIT THESE ===================== */
+  const UPI_ID = "7300479727@ybl";       // <-- replace with your real UPI ID
+  const PAYEE_NAME = "SAHIL CHOUDHARY";  // <-- replace with your real name
+  const AMOUNT = "7.00";
+  const RECEIVER_EMAIL = "housepaw07@gmail.com";
+
+  // Web3Forms config — sign up free at https://web3forms.com
+  // Get your Access Key from the dashboard after creating a form pointed at RECEIVER_EMAIL
+  const WEB3FORMS_ACCESS_KEY = "ee2fb5fe-647a-4a1f-87a5-52584cbded54";
+  /* ================================================================= */
+ 
+  const form = document.getElementById('step1');
+  let petPhotoDataUrl = "";
+ 
+  // photo preview
+  const photoInput = document.getElementById('petPhoto');
+  const photoPreview = document.getElementById('photoPreview');
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      petPhotoDataUrl = e.target.result;
+      photoPreview.src = petPhotoDataUrl;
+      photoPreview.style.display = 'block';
+      clearError('f-petPhoto');
+    };
+    reader.readAsDataURL(file);
+  });
+ 
+  function setError(id, show) {
+    document.getElementById(id).classList.toggle('invalid', show);
+  }
+  function clearError(id) { setError(id, false); }
+ 
+  function validateStep1() {
+    let ok = true;
+    const data = Object.fromEntries(new FormData(form).entries());
+ 
+    if (!data.ownerName || data.ownerName.trim().length < 2) { setError('f-ownerName', true); ok = false; } else clearError('f-ownerName');
+    if (!/^[0-9+\-\s]{7,15}$/.test(data.ownerContact || "")) { setError('f-ownerContact', true); ok = false; } else clearError('f-ownerContact');
+    if (!data.petName || data.petName.trim().length < 1) { setError('f-petName', true); ok = false; } else clearError('f-petName');
+    if (!data.petBreed || data.petBreed.trim().length < 1) { setError('f-petBreed', true); ok = false; } else clearError('f-petBreed');
+    if (data.petAge === "" || isNaN(data.petAge) || Number(data.petAge) < 0) { setError('f-petAge', true); ok = false; } else clearError('f-petAge');
+    if (!data.petSex) { setError('f-petSex', true); ok = false; } else clearError('f-petSex');
+    if (!petPhotoDataUrl) { setError('f-petPhoto', true); ok = false; } else clearError('f-petPhoto');
+
+    if (ok) data.petAgeDisplay = `${data.petAge} ${data.petAgeUnit || 'Years'}`;
+    return ok ? data : null;
+  }
+ 
+  let formData = null;
+ 
+  function goToStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    document.querySelectorAll('.progress .dot').forEach(d => {
+      const step = Number(d.dataset.step);
+      d.classList.toggle('active', step === n);
+      d.classList.toggle('done', step < n);
+    });
+    document.querySelectorAll('.progress .bar').forEach(b => {
+      const step = Number(b.dataset.bar);
+      b.classList.toggle('done', step < n);
+    });
+  }
+ 
+  function goToPayment() {
+    const data = validateStep1();
+    if (!data) return;
+    formData = data;
+ 
+    document.getElementById('summaryBox').innerHTML = `
+      <div><span>Pet Name</span><span>${escapeHtml(data.petName)}</span></div>
+      <div><span>Owner</span><span>${escapeHtml(data.ownerName)}</span></div>
+      <div><span>Pet Age</span><span>${escapeHtml(data.petAgeDisplay)}</span></div>
+      <div class="total"><span>Registration Fee</span><span>₹7</span></div>
+    `;
+    document.getElementById('upiIdDisplay').textContent = UPI_ID;
+ 
+    const upiString = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${AMOUNT}&cu=INR&tn=${encodeURIComponent('Paw House Registration - ' + data.petName)}`;
+    document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiString)}`;
+ 
+    goToStep(2);
+  }
+ 
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+ 
+  function submitRegistration() {
+    const btn = document.getElementById('paidBtn');
+    const status = document.getElementById('sendStatus');
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    status.classList.remove('error');
+    status.textContent = "Sending registration details...";
+ 
+    const payload = {
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: `New Paw House Registration — ${formData.petName}`,
+      from_name: "Paw House Registration",
+      owner_name: formData.ownerName,
+      owner_contact: formData.ownerContact,
+      pet_name: formData.petName,
+      pet_breed: formData.petBreed,
+      pet_sex: formData.petSex,
+      pet_age: formData.petAgeDisplay,
+      pet_photo: petPhotoDataUrl,   // base64 image (keep photos small — large payloads may be rejected)
+      to_email: RECEIVER_EMAIL,
+      fee_paid: "₹7"
+    };
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          status.textContent = "";
+          goToStep(3);
+        } else {
+          throw new Error(result.message || "Send failed");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        status.classList.add('error');
+        status.textContent = "Couldn't send automatically. Please try again or contact us directly.";
+        btn.disabled = false;
+        btn.textContent = "I've Paid ₹7 — Complete";
+      });
+  }
+</script>
+</body>
+</html>
