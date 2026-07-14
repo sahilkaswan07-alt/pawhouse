@@ -11,6 +11,39 @@
      .status-pill{ cursor:pointer; user-select:none; transition:transform .15s ease, filter .15s ease; }
      .status-pill:hover{ filter:brightness(1.15); transform:scale(1.06); }
      .status-pill:active{ transform:scale(0.96); }
+
+     /* ===== Owner photo upload tile ===== */
+     .upload-tile{
+       display:flex; flex-direction:column; align-items:center; justify-content:center;
+       gap:6px; aspect-ratio:1/1; border-radius:14px;
+       border:2px dashed rgba(244,162,77,.55);
+       background:rgba(244,162,77,.06);
+       cursor:pointer; text-align:center; padding:10px;
+       transition:transform .15s ease, filter .15s ease, border-color .15s ease;
+       color:#f4a24d; font-family:'Inter',sans-serif;
+     }
+     .upload-tile:hover{ filter:brightness(1.12); transform:scale(1.02); border-color:rgba(244,162,77,.9); }
+     .upload-tile:active{ transform:scale(0.97); }
+     .upload-tile .up-icon{ font-size:26px; line-height:1; }
+     .upload-tile .up-label{ font-size:13px; font-weight:600; }
+     .upload-tile .up-sub{ font-size:11px; opacity:.75; font-weight:400; }
+     .upload-tile.locked{
+       cursor:not-allowed; border-color:rgba(255,255,255,.18);
+       background:rgba(255,255,255,.03); color:rgba(255,255,255,.55);
+     }
+     .upload-tile.locked:hover{ filter:none; transform:none; }
+     .gallery-note{
+       margin-top:10px; font-size:12px; color:rgba(255,255,255,.55);
+       font-family:'Inter',sans-serif; text-align:center;
+     }
+     .gallery-toast{
+       position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+       background:#1b1e27; border:1px solid rgba(244,162,77,.4); color:#fff;
+       padding:12px 18px; border-radius:10px; font-family:'Inter',sans-serif; font-size:13px;
+       opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+       z-index:999; max-width:80vw; text-align:center;
+     }
+     .gallery-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
    </style>
 </head> 
 <body>
@@ -165,13 +198,22 @@
   <!-- ⑥ GALLERY — add <img> tags for each photo -->
   <div class="sec">
     <div class="sec-title"><span class="icon">📸</span> Memories & Gallery</div>
-    <div class="gallery-grid">
+    <div class="gallery-grid" id="galleryGrid">
       <img src="bruno.png" alt="Bruno memory" onclick="openLightbox(this.src)">
       <!-- Add more photos here:
       <img src="photo2.jpg" alt="..." onclick="openLightbox(this.src)">
       <img src="photo3.jpg" alt="..." onclick="openLightbox(this.src)">
       -->
+
+      <!-- Owner upload tile — always rendered last, state toggled by JS -->
+      <div class="upload-tile" id="uploadTile" onclick="handleUploadTileClick()">
+        <div class="up-icon">📷</div>
+        <div class="up-label" id="uploadLabel">Add a Memory</div>
+        <div class="up-sub" id="uploadSub">1 photo every 15 days</div>
+      </div>
+      <input type="file" id="galleryFileInput" accept="image/*" style="display:none" onchange="handleGalleryUpload(event)">
     </div>
+    <div class="gallery-note" id="galleryNote"></div>
     <!-- If no photos yet, use this instead:
     <div class="gallery-empty">No memories added yet 🐾 — photos will appear here soon.</div>
     -->
@@ -188,6 +230,9 @@
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightboxImg" src="" alt="">
 </div>
+
+<!-- GALLERY UPLOAD TOAST -->
+<div class="gallery-toast" id="galleryToast"></div>
  
 <script>
   /* ===== BACKGROUND CANVAS ===== */
@@ -238,6 +283,150 @@
 
   /* ===== FOOTER YEAR ===== */
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ===== OWNER GALLERY UPLOAD — 1 photo every 15 days ===== */
+  // Change this if you reuse this file for another pet, so each pet's
+  // upload history + cooldown is tracked separately in the browser.
+  const PET_ID = 'bruno';
+  const UPLOAD_COOLDOWN_DAYS = 15;
+  const UPLOAD_COOLDOWN_MS = UPLOAD_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+  const LS_PHOTOS_KEY = `pawhouse_gallery_${PET_ID}`;
+  const LS_LAST_UPLOAD_KEY = `pawhouse_gallery_last_${PET_ID}`;
+
+  function getStoredPhotos() {
+    try {
+      return JSON.parse(localStorage.getItem(LS_PHOTOS_KEY) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function getLastUploadTime() {
+    const raw = localStorage.getItem(LS_LAST_UPLOAD_KEY);
+    return raw ? parseInt(raw, 10) : 0;
+  }
+
+  function msUntilNextUpload() {
+    const elapsed = Date.now() - getLastUploadTime();
+    return Math.max(0, UPLOAD_COOLDOWN_MS - elapsed);
+  }
+
+  function formatDaysRemaining(ms) {
+    const days = Math.ceil(ms / (24 * 60 * 60 * 1000));
+    return days <= 1 ? 'tomorrow' : `in ${days} days`;
+  }
+
+  function showGalleryToast(message) {
+    const toast = document.getElementById('galleryToast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showGalleryToast._t);
+    showGalleryToast._t = setTimeout(() => toast.classList.remove('show'), 3200);
+  }
+
+  function renderStoredPhotos() {
+    const grid = document.getElementById('galleryGrid');
+    const tile = document.getElementById('uploadTile');
+    const fileInput = document.getElementById('galleryFileInput');
+    const photos = getStoredPhotos();
+    photos.forEach(p => {
+      const img = document.createElement('img');
+      img.src = p.src;
+      img.alt = 'Bruno memory';
+      img.onclick = () => openLightbox(img.src);
+      grid.insertBefore(img, tile);
+    });
+    updateUploadTileState();
+  }
+
+  function updateUploadTileState() {
+    const tile = document.getElementById('uploadTile');
+    const label = document.getElementById('uploadLabel');
+    const sub = document.getElementById('uploadSub');
+    const note = document.getElementById('galleryNote');
+    const remaining = msUntilNextUpload();
+
+    if (remaining > 0) {
+      tile.classList.add('locked');
+      label.textContent = 'Come back soon';
+      sub.textContent = `Next photo ${formatDaysRemaining(remaining)}`;
+      note.textContent = `You've already added a memory recently — you can upload your next photo ${formatDaysRemaining(remaining)}.`;
+    } else {
+      tile.classList.remove('locked');
+      label.textContent = 'Add a Memory';
+      sub.textContent = '1 photo every 15 days';
+      note.textContent = '';
+    }
+  }
+
+  function handleUploadTileClick() {
+    if (msUntilNextUpload() > 0) {
+      showGalleryToast(`You can add your next memory ${formatDaysRemaining(msUntilNextUpload())} 🐾`);
+      return;
+    }
+    document.getElementById('galleryFileInput').click();
+  }
+
+  function handleGalleryUpload(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (msUntilNextUpload() > 0) {
+      showGalleryToast(`You can add your next memory ${formatDaysRemaining(msUntilNextUpload())} 🐾`);
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      showGalleryToast('Please choose an image file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Downscale before saving so localStorage doesn't fill up with huge images
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1000;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const scale = MAX_DIM / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvasEl = document.createElement('canvas');
+        canvasEl.width = width;
+        canvasEl.height = height;
+        canvasEl.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvasEl.toDataURL('image/jpeg', 0.82);
+
+        const photos = getStoredPhotos();
+        photos.push({ src: dataUrl, date: Date.now() });
+        try {
+          localStorage.setItem(LS_PHOTOS_KEY, JSON.stringify(photos));
+          localStorage.setItem(LS_LAST_UPLOAD_KEY, String(Date.now()));
+        } catch (err) {
+          showGalleryToast('Storage is full — please remove old photos to add new ones.');
+          return;
+        }
+
+        const grid = document.getElementById('galleryGrid');
+        const tile = document.getElementById('uploadTile');
+        const newImg = document.createElement('img');
+        newImg.src = dataUrl;
+        newImg.alt = 'Bruno memory';
+        newImg.onclick = () => openLightbox(newImg.src);
+        grid.insertBefore(newImg, tile);
+
+        updateUploadTileState();
+        showGalleryToast('Memory added! 🐾 See you again in 15 days.');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  renderStoredPhotos();
+  setInterval(updateUploadTileState, 60 * 60 * 1000); // refresh lock state hourly
  
   /* ===== LIGHTBOX ===== */
   function openLightbox(src) {
