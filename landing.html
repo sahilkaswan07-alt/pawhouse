@@ -1,10 +1,24 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paw House</title>
     <link rel="stylesheet" href="landing.css">
+    <style>
+      .link-already-member {
+        display: inline-block;
+        margin-top: 14px;
+        font-size: 0.95rem;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      .link-already-member:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+    </style>
 </head>
 <body>
  
@@ -13,6 +27,7 @@
  
   <div class="page">
     <section class="hero">
+      
       <div class="premium-badge">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 9l-5.2 4.4L17.4 21 12 17.3 6.6 21l1.6-7.6L3 9l6.6-.4L12 2z"/></svg>
         Premium Pet House
@@ -24,6 +39,7 @@
         <p class="tagline">A House Away From Home</p>
         <p class="tagline">a community that treat every pet like a family member</p>
         <a href="registration.html" class="btn-register">Register Now</a>
+        <a href="home.html" class="link-already-member">Already a member? Go to Home →</a>
    
         <div class="stats-strip">
           <div class="stat-item">
@@ -38,10 +54,15 @@
             <div class="stat-num">24/7</div>
             <div class="stat-label">Care & Support</div>
           </div>
-          <div class="stat-item">
+          <!--<div class="stat-item">
             <div class="stat-num">12 yrs</div>
             <div class="stat-label">Of Experience</div>
-          </div>
+          </div> -->
+          <br>
+          <br>
+          <br> 
+          <br>
+          <br>        
         </div>
       </div>
     </section>
@@ -71,9 +92,9 @@
     </div>
   </div>
    
-  <!-- Why Join Us Button -->
-  <div class="why-btn-wrap">
-    <button class="btn-why" onclick="openModal()">❓ Why Join Us?</button>
+  <!-- Why Join Us Button -->  
+  <div class="why-btn-wrap">    
+    <button class="btn-why" onclick="openModal()">❓ Why Join Us?</button>    
   </div>
    
   <!-- Why Join Modal -->

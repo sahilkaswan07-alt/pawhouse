@@ -95,22 +95,21 @@
     <!-- STEP 2: PAYMENT -->
     <div id="step2" class="step">
       <div class="pay-summary" id="summaryBox"></div>
- 
-      <div class="qr-box">
-        <img id="qrImg" src="phonepay.png" alt="Scan to pay">
-        <div class="upi-line">Scan with any UPI app &middot; Pay to <b id="upiIdDisplay">your-upi-id@bank</b></div>
+
+      <div class="qr-box" id="payStatusBox">
+        <div class="ph-icon">💳</div>
+        <div class="upi-line" id="payStatusText">Payment of ₹7 is required to complete registration.</div>
       </div>
-     <!--`  <div class="qr-note">
-        ⚠️ This QR currently uses a <b>placeholder UPI ID</b>. Replace <code>UPI_ID</code> in the script with your real UPI ID before going live, or payment will not reach you.
-      </div>-->
- 
+
+      <div class="err" id="payWarning" style="display:none;margin-top:10px;">Please complete the payment first.</div>
+
       <div class="btn-row">
         <button type="button" class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
-        <button type="button" class="btn btn-primary" id="paidBtn" onclick="submitRegistration()">I've Paid ₹7 — Complete</button>
+        <button type="button" class="btn btn-primary" id="paidBtn" onclick="startPayment()">Pay ₹7 Now</button>
       </div>
       <div class="send-status" id="sendStatus"></div>
     </div>
- 
+
     <!-- STEP 3: SUCCESS -->
     <div id="step3" class="step">
       <div class="success">
@@ -124,13 +123,14 @@
         </div>
       </div>
     </div>
- 
+
   </div>
 </div>
- 
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
   /* ===================== CONFIG — EDIT THESE ===================== */
-  const UPI_ID = "7300479727@ybl";       // <-- replace with your real UPI ID
+  const RAZORPAY_KEY_ID = "RAZORPAY_KEY_ID_HERE"; // <-- your Razorpay Key ID (public "key_id", starts with rzp_)
   const PAYEE_NAME = "SAHIL CHOUDHARY";  // <-- replace with your real name
   const AMOUNT = "7.00";
   const RECEIVER_EMAIL = "housepaw07@gmail.com";
@@ -207,10 +207,15 @@
       <div><span>Pet Age</span><span>${escapeHtml(data.petAgeDisplay)}</span></div>
       <div class="total"><span>Registration Fee</span><span>₹7</span></div>
     `;
-    document.getElementById('upiIdDisplay').textContent = UPI_ID;
- 
-    const upiString = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${AMOUNT}&cu=INR&tn=${encodeURIComponent('Paw House Registration - ' + data.petName)}`;
-    document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiString)}`;
+
+    // reset payment state each time this step is (re)entered
+    paymentVerified = false;
+    razorpayPaymentId = "";
+    document.getElementById('payWarning').style.display = 'none';
+    document.getElementById('payStatusText').textContent = 'Payment of ₹7 is required to complete registration.';
+    const btn = document.getElementById('paidBtn');
+    btn.disabled = false;
+    btn.textContent = 'Pay ₹7 Now';
  
     goToStep(2);
   }
@@ -218,8 +223,62 @@
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
- 
+
+  let paymentVerified = false;
+  let razorpayPaymentId = "";
+
+  function startPayment() {
+    document.getElementById('payWarning').style.display = 'none';
+    const btn = document.getElementById('paidBtn');
+    btn.disabled = true;
+    btn.textContent = "Opening payment...";
+
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount: Math.round(Number(AMOUNT) * 100), // paise
+      currency: "INR",
+      name: "Paw House",
+      description: `Registration fee - ${formData.petName}`,
+      prefill: {
+        name: formData.ownerName,
+        contact: formData.ownerContact
+      },
+      theme: { color: "#ff7a1a" },
+      handler: function (response) {
+        // Razorpay only calls this after the payment is actually confirmed successful.
+        paymentVerified = true;
+        razorpayPaymentId = response.razorpay_payment_id;
+        document.getElementById('payStatusText').textContent = "✅ Payment received — completing registration...";
+        submitRegistration();
+      },
+      modal: {
+        ondismiss: function () {
+          // user closed the checkout without paying
+          paymentVerified = false;
+          btn.disabled = false;
+          btn.textContent = "Pay ₹7 Now";
+          document.getElementById('payWarning').style.display = 'block';
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function () {
+      paymentVerified = false;
+      btn.disabled = false;
+      btn.textContent = "Pay ₹7 Now";
+      document.getElementById('payWarning').textContent = "Payment failed. Please try again.";
+      document.getElementById('payWarning').style.display = 'block';
+    });
+    rzp.open();
+  }
+
   function submitRegistration() {
+    if (!paymentVerified) {
+      document.getElementById('payWarning').textContent = "Please complete the payment first.";
+      document.getElementById('payWarning').style.display = 'block';
+      return;
+    }
     const btn = document.getElementById('paidBtn');
     const status = document.getElementById('sendStatus');
     btn.disabled = true;
@@ -239,7 +298,8 @@
       pet_age: formData.petAgeDisplay,
       pet_photo: petPhotoDataUrl,   // base64 image (keep photos small — large payloads may be rejected)
       to_email: RECEIVER_EMAIL,
-      fee_paid: "₹7"
+      fee_paid: "₹7",
+      razorpay_payment_id: razorpayPaymentId
     };
 
     fetch("https://api.web3forms.com/submit", {
@@ -261,7 +321,7 @@
         status.classList.add('error');
         status.textContent = "Couldn't send automatically. Please try again or contact us directly.";
         btn.disabled = false;
-        btn.textContent = "I've Paid ₹7 — Complete";
+        btn.textContent = "Pay ₹7 Now";
       });
   }
 </script>

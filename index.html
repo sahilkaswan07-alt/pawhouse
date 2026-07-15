@@ -1,4 +1,4 @@
- <!DOCTYPE html> 
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -57,8 +57,9 @@
   }
   let rings = [];
   function init(){ rings = Array.from({length:6},(_,i)=>mkRing(i)); }
- 
+
   let mouse = {x:0,y:0,tx:0,ty:0};
+  let opened = false; // becomes true once the gates open
   let camRotY=0, camRotX=0.25;
   function project3D(x,y,z){
     const cosY=Math.cos(camRotY), sinY=Math.sin(camRotY);
@@ -170,7 +171,6 @@
   addGateRings('ringsLeft');
   addGateRings('ringsRight');
  
-  let opened = false;
   function openGates(){
     if(opened) return;
     opened = true;
@@ -193,10 +193,3 @@
 </script>  
 </body>
 </html> 
-
-
-
-
-
-
-
