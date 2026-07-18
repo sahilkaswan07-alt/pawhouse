@@ -44,6 +44,107 @@
        z-index:999; max-width:80vw; text-align:center;
      }
      .gallery-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+     /* ===== BCS (Body Condition Score) monthly check-in ===== */
+     .bcs-intro{
+       font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.5;
+       color:rgba(255,255,255,.65); margin-bottom:18px; max-width:640px;
+     }
+     .bcs-q{ margin-bottom:20px; }
+     .bcs-q-text{
+       font-family:'Inter',sans-serif; font-size:14.5px; font-weight:600;
+       color:#fff; margin-bottom:10px;
+     }
+     .bcs-opts{ display:flex; flex-direction:column; gap:8px; }
+     .bcs-opt{
+       text-align:left; font-family:'Inter',sans-serif; font-size:13.5px;
+       color:rgba(255,255,255,.82); background:rgba(255,255,255,.04);
+       border:1.5px solid rgba(255,255,255,.12); border-radius:10px;
+       padding:10px 14px; cursor:pointer;
+       transition:border-color .15s ease, background .15s ease, transform .1s ease;
+     }
+     .bcs-opt:hover{ border-color:rgba(244,162,77,.55); background:rgba(244,162,77,.07); }
+     .bcs-opt:active{ transform:scale(0.99); }
+     .bcs-opt.selected{
+       border-color:#f4a24d; background:rgba(244,162,77,.16); color:#fff; font-weight:600;
+     }
+     .bcs-submit{
+       margin-top:6px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
+       color:#1b1108; background:#f4a24d; border:none; border-radius:10px;
+       padding:12px 22px; cursor:pointer; transition:filter .15s ease, transform .1s ease, opacity .15s ease;
+     }
+     .bcs-submit:hover:not(:disabled){ filter:brightness(1.08); }
+     .bcs-submit:active:not(:disabled){ transform:scale(0.98); }
+     .bcs-submit:disabled{ opacity:.4; cursor:not-allowed; }
+
+     .bcs-result-card{
+       display:flex; align-items:center; gap:18px; background:rgba(244,162,77,.08);
+       border:1px solid rgba(244,162,77,.35); border-radius:14px; padding:18px 20px;
+       margin-bottom:14px;
+     }
+     .bcs-result-num{
+       font-family:'Playfair Display',serif; font-weight:900; font-size:40px;
+       color:#f4a24d; line-height:1; min-width:56px; text-align:center;
+     }
+     .bcs-result-info .bcs-result-cat{
+       font-family:'Inter',sans-serif; font-weight:700; font-size:16px; color:#fff; margin-bottom:2px;
+     }
+     .bcs-result-info .bcs-result-desc{
+       font-family:'Inter',sans-serif; font-size:13px; color:rgba(255,255,255,.65);
+     }
+     .bcs-note{
+       font-family:'Inter',sans-serif; font-size:12.5px; color:rgba(255,255,255,.55);
+       margin-bottom:14px; line-height:1.5;
+     }
+     .bcs-locked-msg{
+       font-family:'Inter',sans-serif; font-size:13.5px; color:rgba(255,255,255,.65);
+       margin-bottom:14px;
+     }
+     details.bcs-table-toggle{
+       font-family:'Inter',sans-serif; font-size:13px; color:rgba(255,255,255,.75);
+       margin-bottom:16px; border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:10px 14px;
+     }
+     details.bcs-table-toggle summary{ cursor:pointer; font-weight:600; color:#f4a24d; }
+     .bcs-mini-table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:12.5px; }
+     .bcs-mini-table th, .bcs-mini-table td{
+       text-align:left; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.08);
+       color:rgba(255,255,255,.75);
+     }
+     .bcs-mini-table th{ color:#fff; font-weight:700; }
+     .bcs-mini-table tr.current-row td{ color:#f4a24d; font-weight:700; }
+     .bcs-history{ margin-top:6px; }
+     .bcs-history-title{
+       font-family:'Inter',sans-serif; font-size:12.5px; font-weight:700;
+       color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:.04em;
+       margin-bottom:8px;
+     }
+     .bcs-history-row{
+       display:flex; justify-content:space-between; font-family:'Inter',sans-serif;
+       font-size:13px; color:rgba(255,255,255,.72); padding:7px 0;
+       border-bottom:1px solid rgba(255,255,255,.06);
+     }
+     .bcs-history-row span.bcs-h-cat{ color:rgba(255,255,255,.5); }
+
+     /* ===== WhatsApp care reminder banner ===== */
+     .wa-reminder-banner{
+       position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+       display:flex; align-items:center; gap:12px;
+       background:#1b1e27; border:1px solid rgba(37,211,102,.45); color:#fff;
+       padding:12px 14px 12px 18px; border-radius:12px; font-family:'Inter',sans-serif; font-size:13px;
+       opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+       z-index:1000; max-width:90vw; box-shadow:0 8px 24px rgba(0,0,0,.35);
+     }
+     .wa-reminder-banner.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+     .wa-reminder-banner #waReminderBtn{
+       background:#25D366; color:#0b1a10; border:none; border-radius:8px;
+       font-weight:700; font-size:12.5px; padding:8px 14px; cursor:pointer; white-space:nowrap;
+       transition:filter .15s ease;
+     }
+     .wa-reminder-banner #waReminderBtn:hover{ filter:brightness(1.08); }
+     .wa-reminder-banner #waReminderClose{
+       background:transparent; border:none; color:rgba(255,255,255,.5); cursor:pointer; font-size:14px; padding:4px;
+     }
+     .wa-reminder-banner #waReminderClose:hover{ color:#fff; }
    </style>
 </head> 
 <body>
@@ -85,28 +186,29 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr data-remind-type="vaccination" data-due="2024-01-12">
           <td>DHPPi (Core Vaccine)</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
           <td class="col-date">12 Jan 2024</td>
         </tr>
-        <tr>
+        <tr data-remind-type="vaccination" data-due="2024-07-18">
           <td>Rabies</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
-          <td class="col-date">12 Jan 2024</td>
+          <td class="col-date">18 Jul 2026</td>
         </tr>
-        <tr>
+        <tr data-remind-type="vaccination" data-due="2026-07-19">
           <td>Leptospirosis</td>
           <td><span class="status-pill due" onclick="cycleStatus(this)" title="Tap to mark as done">Due</span></td>
-          <td class="col-date">15 Jul 2025</td>
+          <td class="col-date">19 Jul 2026</td>
         </tr>
-        <tr>
+        <tr data-remind-type="vaccination" data-due="2025-03-01">
           <td>Booster Dose</td>
           <td><span class="status-pill miss" onclick="cycleStatus(this)" title="Tap to mark as done">Missed</span></td>
           <td class="col-date">01 Mar 2025</td>
         </tr>
-        <!-- Add more rows:
-        <tr>
+        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown,
+             so the hidden WhatsApp reminder (in petbox.js) can compare it to today:
+        <tr data-remind-type="vaccination" data-due="YYYY-MM-DD">
           <td>Vaccine Name</td>
           <td><span class="status-pill due">Due</span></td>
           <td class="col-date">DD Mon YYYY</td>
@@ -128,21 +230,28 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr data-remind-type="deworming" data-due="2024-02-10">
           <td>1st Deworming</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
           <td class="col-date">10 Feb 2024</td>
         </tr>
-        <tr>
+        <tr data-remind-type="deworming" data-due="2024-05-10">
           <td>2nd Deworming</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
           <td class="col-date">10 May 2024</td>
         </tr>
-        <tr>
+        <tr data-remind-type="deworming" data-due="2025-08-10">
           <td>Quarterly Deworming</td>
           <td><span class="status-pill due" onclick="cycleStatus(this)" title="Tap to mark as done">Due</span></td>
           <td class="col-date">10 Aug 2025</td>
         </tr>
+        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown:
+        <tr data-remind-type="deworming" data-due="YYYY-MM-DD">
+          <td>Treatment Name</td>
+          <td><span class="status-pill due">Due</span></td>
+          <td class="col-date">DD Mon YYYY</td>
+        </tr>
+        -->
       </tbody>
     </table>
   </div>
@@ -181,7 +290,81 @@
     </div>
   </div>
  
-  <!-- ⑤ AUDIO CALL — coming soon -->
+  <!-- ⑤ BODY CONDITION SCORE (BCS) — monthly 5-question check-in -->
+  <div class="sec">
+    <div class="sec-title"><span class="icon">📏</span> Monthly Body Condition Score</div>
+    <div class="bcs-intro">Answer these 5 quick questions once a month to check Bruno's body condition using the vet-standard 9-point BCS scale — the same simple checks a vet uses at a routine exam.</div>
+
+    <!-- Quiz (shown when a new monthly check-in is available) -->
+    <div id="bcsQuizWrap">
+      <div class="bcs-q" data-q="1">
+        <div class="bcs-q-text">1. Can you easily feel the ribs without pressing hard?</div>
+        <div class="bcs-opts">
+          <button class="bcs-opt" data-score="4.5" onclick="selectBcsOpt(this)">Yes, very easily — little fat covering</button>
+          <button class="bcs-opt" data-score="2" onclick="selectBcsOpt(this)">Ribs are very prominent</button>
+          <button class="bcs-opt" data-score="7.5" onclick="selectBcsOpt(this)">Need to press firmly to feel them</button>
+        </div>
+      </div>
+      <div class="bcs-q" data-q="2">
+        <div class="bcs-q-text">2. Looking from above, is there a visible waist behind the ribs?</div>
+        <div class="bcs-opts">
+          <button class="bcs-opt" data-score="4.5" onclick="selectBcsOpt(this)">Yes, a well-defined waist</button>
+          <button class="bcs-opt" data-score="2" onclick="selectBcsOpt(this)">Very narrow, bones visible</button>
+          <button class="bcs-opt" data-score="7.5" onclick="selectBcsOpt(this)">Waist absent or barely visible</button>
+        </div>
+      </div>
+      <div class="bcs-q" data-q="3">
+        <div class="bcs-q-text">3. Looking from the side, is there an abdominal tuck (belly tucked upward)?</div>
+        <div class="bcs-opts">
+          <button class="bcs-opt" data-score="4.5" onclick="selectBcsOpt(this)">Moderate abdominal tuck</button>
+          <button class="bcs-opt" data-score="2" onclick="selectBcsOpt(this)">Extreme tuck</button>
+          <button class="bcs-opt" data-score="7.5" onclick="selectBcsOpt(this)">Little or no tuck — hanging belly</button>
+        </div>
+      </div>
+      <div class="bcs-q" data-q="4">
+        <div class="bcs-q-text">4. Are the spine, hips, and pelvic bones visible or easily felt?</div>
+        <div class="bcs-opts">
+          <button class="bcs-opt" data-score="1.5" onclick="selectBcsOpt(this)">Visible and prominent</button>
+          <button class="bcs-opt" data-score="4.5" onclick="selectBcsOpt(this)">Can be felt but not seen</button>
+          <button class="bcs-opt" data-score="8" onclick="selectBcsOpt(this)">Difficult or impossible to feel</button>
+        </div>
+      </div>
+      <div class="bcs-q" data-q="5">
+        <div class="bcs-q-text">5. Is there obvious fat build-up over the neck, chest, base of the tail, or belly?</div>
+        <div class="bcs-opts">
+          <button class="bcs-opt" data-score="4.5" onclick="selectBcsOpt(this)">No excess fat</button>
+          <button class="bcs-opt" data-score="6.5" onclick="selectBcsOpt(this)">Moderate fat deposits</button>
+          <button class="bcs-opt" data-score="8.5" onclick="selectBcsOpt(this)">Heavy fat deposits / abdominal fat pad</button>
+        </div>
+      </div>
+      <button class="bcs-submit" id="bcsSubmitBtn" onclick="submitBcs()" disabled>Answer all 5 to see this month's result</button>
+    </div>
+
+    <!-- Result / locked state — filled in by JS -->
+    <div id="bcsResultWrap" style="display:none;"></div>
+
+    <details class="bcs-table-toggle">
+      <summary>Full 9-point BCS reference table</summary>
+      <table class="bcs-mini-table" id="bcsRefTable">
+        <thead><tr><th>BCS</th><th>Condition</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-bcs="1"><td>1</td><td>Emaciated</td><td>Bones clearly visible, no body fat</td></tr>
+          <tr data-bcs="2"><td>2</td><td>Very Thin</td><td>Minimal fat, severe muscle loss</td></tr>
+          <tr data-bcs="3"><td>3</td><td>Thin</td><td>Ribs obvious, slight fat cover</td></tr>
+          <tr data-bcs="4"><td>4</td><td>Lean</td><td>Ribs easily felt, visible waist</td></tr>
+          <tr data-bcs="5"><td>5</td><td>Ideal</td><td>Ribs palpable, waist & abdominal tuck present</td></tr>
+          <tr data-bcs="6"><td>6</td><td>Slightly Overweight</td><td>Slight fat over ribs, waist less obvious</td></tr>
+          <tr data-bcs="7"><td>7</td><td>Overweight</td><td>Difficult to feel ribs, no clear waist</td></tr>
+          <tr data-bcs="8"><td>8</td><td>Obese</td><td>Heavy fat deposits, abdominal distension</td></tr>
+          <tr data-bcs="9"><td>9</td><td>Grossly Obese</td><td>Massive fat deposits, no waist, marked fat</td></tr>
+        </tbody>
+      </table>
+    </details>
+
+    <div id="bcsHistoryWrap"></div>
+  </div>
+
+  <!-- ⑥ AUDIO CALL — coming soon -->
   <div class="sec">
     <div class="sec-title">
       <span class="icon">📞</span> Audio Call with Us
@@ -195,7 +378,7 @@
     </div>
   </div>
  
-  <!-- ⑥ GALLERY — add <img> tags for each photo -->
+  <!-- ⑦ GALLERY — add <img> tags for each photo -->
   <div class="sec">
     <div class="sec-title"><span class="icon">📸</span> Memories & Gallery</div>
     <div class="gallery-grid" id="galleryGrid">
@@ -233,210 +416,16 @@
 
 <!-- GALLERY UPLOAD TOAST -->
 <div class="gallery-toast" id="galleryToast"></div>
+
+<!-- WHATSAPP CARE REMINDER BANNER — appears only when a vaccine/deworming item is due
+     on its registered date. The owner's WhatsApp number itself is set in petbox.js and
+     is never shown on screen. -->
+<div class="wa-reminder-banner" id="waReminderBanner">
+  <span id="waReminderText"></span>
+  <button id="waReminderBtn" onclick="sendWhatsAppReminder()">Send WhatsApp Reminder</button>
+  <button id="waReminderClose" onclick="dismissWhatsAppReminder()" title="Dismiss for today">✕</button>
+</div>
  
-<script>
-  /* ===== BACKGROUND CANVAS ===== */
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
-  let W, H;
-  const FOCAL = 560;
-  const COLS = [[244,162,77],[224,123,123],[201,111,208],[100,160,255]];
-  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  function mkRing(i){ const col=COLS[i%COLS.length]; return {radius:180+i*70,tilt:(i*0.6)+Math.random()*0.4,spin:(Math.random()-.5)*0.012+0.004,rot:Math.random()*Math.PI*2,points:64,col,nodeOffset:Math.random()*Math.PI*2}; }
-  let rings=[];
-  function init(){ rings=Array.from({length:6},(_,i)=>mkRing(i)); }
-  let mouse={tx:0,ty:0.25}, camRotY=0, camRotX=0.25;
-  function project3D(x,y,z){ const cosY=Math.cos(camRotY),sinY=Math.sin(camRotY); let x1=x*cosY-z*sinY,z1=x*sinY+z*cosY; const cosX=Math.cos(camRotX),sinX=Math.sin(camRotX); let y1=y*cosX-z1*sinX,z2=y*sinX+z1*cosX; const scale=FOCAL/(FOCAL+z2+500); return{sx:W*.5+x1*scale,sy:H*.5+y1*scale,scale,z:z2}; }
-  function drawBlobs(t){ [{cx:W*.30+Math.sin(t*.30)*110,cy:H*.42+Math.cos(t*.20)*75,r:320,col:'244,162,77',a:.07},{cx:W*.72+Math.cos(t*.25)*90,cy:H*.60+Math.sin(t*.32)*65,r:250,col:'201,111,208',a:.07},{cx:W*.52+Math.sin(t*.18)*70,cy:H*.24+Math.cos(t*.22)*55,r:190,col:'100,160,255',a:.05}].forEach(({cx,cy,r,col,a})=>{ const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r); g.addColorStop(0,`rgba(${col},${a})`); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }); }
-  function drawVignette(){ const g=ctx.createRadialGradient(W/2,H/2,H*.06,W/2,H/2,H*.80); g.addColorStop(0,'rgba(13,15,20,0)'); g.addColorStop(1,'rgba(13,15,20,.85)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
-  let t=0;
-  function animate(){ requestAnimationFrame(animate); t+=.007; camRotY+=(mouse.tx-camRotY)*.02; camRotX+=(mouse.ty-camRotX)*.02; ctx.fillStyle='#0d0f14'; ctx.fillRect(0,0,W,H); drawBlobs(t); const drawables=[]; rings.forEach(ring=>{ ring.rot+=ring.spin; const pts=[]; for(let p=0;p<=ring.points;p++){ const a=(p/ring.points)*Math.PI*2; const rx=Math.cos(a)*ring.radius,ry=Math.sin(a)*ring.radius*Math.sin(ring.tilt),rz=Math.sin(a)*ring.radius*Math.cos(ring.tilt); const cs=Math.cos(ring.rot),sn=Math.sin(ring.rot); pts.push(project3D(rx*cs-rz*sn,ry,rx*sn+rz*cs)); } const avgZ=pts.reduce((s,p)=>s+p.z,0)/pts.length; drawables.push({ring,pts,avgZ}); const na=ring.nodeOffset+t*1.3; const nrx=Math.cos(na)*ring.radius,nry=Math.sin(na)*ring.radius*Math.sin(ring.tilt),nrz=Math.sin(na)*ring.radius*Math.cos(ring.tilt); const cs=Math.cos(ring.rot),sn=Math.sin(ring.rot); const node=project3D(nrx*cs-nrz*sn,nry,nrx*sn+nrz*cs); drawables.push({node,ring,avgZ:node.z,isNode:true}); }); drawables.sort((a,b)=>a.avgZ-b.avgZ); drawables.forEach(d=>{ if(d.isNode){ const{node,ring}=d; const depth=Math.max(0,Math.min(1,(node.z+500)/900)); const r=3+depth*4,alpha=.25+depth*.6; const halo=ctx.createRadialGradient(node.sx,node.sy,0,node.sx,node.sy,r*4); halo.addColorStop(0,`rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${(alpha*.5).toFixed(3)})`); halo.addColorStop(1,'transparent'); ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(node.sx,node.sy,r*4,0,Math.PI*2); ctx.fill(); ctx.fillStyle=`rgba(255,255,255,${alpha.toFixed(3)})`; ctx.beginPath(); ctx.arc(node.sx,node.sy,Math.max(r,1),0,Math.PI*2); ctx.fill(); } else { const{ring,pts}=d; const depth=Math.max(0,Math.min(1,(d.avgZ+500)/900)); ctx.beginPath(); ctx.strokeStyle=`rgba(${ring.col[0]},${ring.col[1]},${ring.col[2]},${(.08+depth*.22).toFixed(3)})`; ctx.lineWidth=.8+depth*1.2; pts.forEach((p,idx)=>idx===0?ctx.moveTo(p.sx,p.sy):ctx.lineTo(p.sx,p.sy)); ctx.stroke(); } }); drawVignette(); }
-  window.addEventListener('mousemove',e=>{ mouse.tx=((e.clientX/W)-.5)*0.6; mouse.ty=0.25+((e.clientY/H)-.5)*0.4; });
-  window.addEventListener('mouseleave',()=>{ mouse.tx=0; mouse.ty=0.25; });
-  resize(); init(); animate();
-  window.addEventListener('resize',()=>{ resize(); init(); });
- 
-  /* ===== STATUS PILL — tap to mark done / undo ===== */
-  function cycleStatus(el) {
-    const row = el.closest('tr');
-    const dateCell = row ? row.querySelector('.col-date') : null;
-    if (el.classList.contains('done')) {
-      // Undo — revert back to Due
-      el.classList.remove('done');
-      el.classList.add('due');
-      el.textContent = 'Due';
-      el.title = 'Tap to mark as done';
-    } else {
-      // Mark as Done — stamp today's date
-      el.classList.remove('due', 'miss');
-      el.classList.add('done');
-      el.textContent = 'Done';
-      el.title = 'Tap to update';
-      if (dateCell) {
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        dateCell.textContent = `${dd} ${months[today.getMonth()]} ${today.getFullYear()}`;
-      }
-    }
-  }
-
-  /* ===== FOOTER YEAR ===== */
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  /* ===== OWNER GALLERY UPLOAD — 1 photo every 15 days ===== */
-  // Change this if you reuse this file for another pet, so each pet's
-  // upload history + cooldown is tracked separately in the browser.
-  const PET_ID = 'bruno';
-  const UPLOAD_COOLDOWN_DAYS = 15;
-  const UPLOAD_COOLDOWN_MS = UPLOAD_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
-  const LS_PHOTOS_KEY = `pawhouse_gallery_${PET_ID}`;
-  const LS_LAST_UPLOAD_KEY = `pawhouse_gallery_last_${PET_ID}`;
-
-  function getStoredPhotos() {
-    try {
-      return JSON.parse(localStorage.getItem(LS_PHOTOS_KEY) || '[]');
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function getLastUploadTime() {
-    const raw = localStorage.getItem(LS_LAST_UPLOAD_KEY);
-    return raw ? parseInt(raw, 10) : 0;
-  }
-
-  function msUntilNextUpload() {
-    const elapsed = Date.now() - getLastUploadTime();
-    return Math.max(0, UPLOAD_COOLDOWN_MS - elapsed);
-  }
-
-  function formatDaysRemaining(ms) {
-    const days = Math.ceil(ms / (24 * 60 * 60 * 1000));
-    return days <= 1 ? 'tomorrow' : `in ${days} days`;
-  }
-
-  function showGalleryToast(message) {
-    const toast = document.getElementById('galleryToast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    clearTimeout(showGalleryToast._t);
-    showGalleryToast._t = setTimeout(() => toast.classList.remove('show'), 3200);
-  }
-
-  function renderStoredPhotos() {
-    const grid = document.getElementById('galleryGrid');
-    const tile = document.getElementById('uploadTile');
-    const fileInput = document.getElementById('galleryFileInput');
-    const photos = getStoredPhotos();
-    photos.forEach(p => {
-      const img = document.createElement('img');
-      img.src = p.src;
-      img.alt = 'Bruno memory';
-      img.onclick = () => openLightbox(img.src);
-      grid.insertBefore(img, tile);
-    });
-    updateUploadTileState();
-  }
-
-  function updateUploadTileState() {
-    const tile = document.getElementById('uploadTile');
-    const label = document.getElementById('uploadLabel');
-    const sub = document.getElementById('uploadSub');
-    const note = document.getElementById('galleryNote');
-    const remaining = msUntilNextUpload();
-
-    if (remaining > 0) {
-      tile.classList.add('locked');
-      label.textContent = 'Come back soon';
-      sub.textContent = `Next photo ${formatDaysRemaining(remaining)}`;
-      note.textContent = `You've already added a memory recently — you can upload your next photo ${formatDaysRemaining(remaining)}.`;
-    } else {
-      tile.classList.remove('locked');
-      label.textContent = 'Add a Memory';
-      sub.textContent = '1 photo every 15 days';
-      note.textContent = '';
-    }
-  }
-
-  function handleUploadTileClick() {
-    if (msUntilNextUpload() > 0) {
-      showGalleryToast(`You can add your next memory ${formatDaysRemaining(msUntilNextUpload())} 🐾`);
-      return;
-    }
-    document.getElementById('galleryFileInput').click();
-  }
-
-  function handleGalleryUpload(event) {
-    const file = event.target.files && event.target.files[0];
-    event.target.value = ''; // allow re-selecting the same file later
-    if (!file) return;
-
-    if (msUntilNextUpload() > 0) {
-      showGalleryToast(`You can add your next memory ${formatDaysRemaining(msUntilNextUpload())} 🐾`);
-      return;
-    }
-    if (!file.type.startsWith('image/')) {
-      showGalleryToast('Please choose an image file.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      // Downscale before saving so localStorage doesn't fill up with huge images
-      const img = new Image();
-      img.onload = () => {
-        const MAX_DIM = 1000;
-        let { width, height } = img;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          const scale = MAX_DIM / Math.max(width, height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-        const canvasEl = document.createElement('canvas');
-        canvasEl.width = width;
-        canvasEl.height = height;
-        canvasEl.getContext('2d').drawImage(img, 0, 0, width, height);
-        const dataUrl = canvasEl.toDataURL('image/jpeg', 0.82);
-
-        const photos = getStoredPhotos();
-        photos.push({ src: dataUrl, date: Date.now() });
-        try {
-          localStorage.setItem(LS_PHOTOS_KEY, JSON.stringify(photos));
-          localStorage.setItem(LS_LAST_UPLOAD_KEY, String(Date.now()));
-        } catch (err) {
-          showGalleryToast('Storage is full — please remove old photos to add new ones.');
-          return;
-        }
-
-        const grid = document.getElementById('galleryGrid');
-        const tile = document.getElementById('uploadTile');
-        const newImg = document.createElement('img');
-        newImg.src = dataUrl;
-        newImg.alt = 'Bruno memory';
-        newImg.onclick = () => openLightbox(newImg.src);
-        grid.insertBefore(newImg, tile);
-
-        updateUploadTileState();
-        showGalleryToast('Memory added! 🐾 See you again in 15 days.');
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  renderStoredPhotos();
-  setInterval(updateUploadTileState, 60 * 60 * 1000); // refresh lock state hourly
- 
-  /* ===== LIGHTBOX ===== */
-  function openLightbox(src) {
-    document.getElementById('lightboxImg').src = src;
-    document.getElementById('lightbox').classList.add('open');
-  }
-  function closeLightbox() {
-    document.getElementById('lightbox').classList.remove('open');
-  }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-</script>
+<script src="petbox.js"></script>
 </body>
 </html>
