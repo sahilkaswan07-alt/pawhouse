@@ -125,26 +125,6 @@
      }
      .bcs-history-row span.bcs-h-cat{ color:rgba(255,255,255,.5); }
 
-     /* ===== WhatsApp care reminder banner ===== */
-     .wa-reminder-banner{
-       position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
-       display:flex; align-items:center; gap:12px;
-       background:#1b1e27; border:1px solid rgba(37,211,102,.45); color:#fff;
-       padding:12px 14px 12px 18px; border-radius:12px; font-family:'Inter',sans-serif; font-size:13px;
-       opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
-       z-index:1000; max-width:90vw; box-shadow:0 8px 24px rgba(0,0,0,.35);
-     }
-     .wa-reminder-banner.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
-     .wa-reminder-banner #waReminderBtn{
-       background:#25D366; color:#0b1a10; border:none; border-radius:8px;
-       font-weight:700; font-size:12.5px; padding:8px 14px; cursor:pointer; white-space:nowrap;
-       transition:filter .15s ease;
-     }
-     .wa-reminder-banner #waReminderBtn:hover{ filter:brightness(1.08); }
-     .wa-reminder-banner #waReminderClose{
-       background:transparent; border:none; color:rgba(255,255,255,.5); cursor:pointer; font-size:14px; padding:4px;
-     }
-     .wa-reminder-banner #waReminderClose:hover{ color:#fff; }
    </style>
 </head> 
 <body>
@@ -206,8 +186,7 @@
           <td><span class="status-pill miss" onclick="cycleStatus(this)" title="Tap to mark as done">Missed</span></td>
           <td class="col-date">01 Mar 2025</td>
         </tr>
-        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown,
-             so the hidden WhatsApp reminder (in petbox.js) can compare it to today:
+        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown:
         <tr data-remind-type="vaccination" data-due="YYYY-MM-DD">
           <td>Vaccine Name</td>
           <td><span class="status-pill due">Due</span></td>
@@ -417,15 +396,6 @@
 <!-- GALLERY UPLOAD TOAST -->
 <div class="gallery-toast" id="galleryToast"></div>
 
-<!-- WHATSAPP CARE REMINDER BANNER — appears only when a vaccine/deworming item is due
-     on its registered date. The owner's WhatsApp number itself is set in petbox.js and
-     is never shown on screen. -->
-<div class="wa-reminder-banner" id="waReminderBanner">
-  <span id="waReminderText"></span>
-  <button id="waReminderBtn" onclick="sendWhatsAppReminder()">Send WhatsApp Reminder</button>
-  <button id="waReminderClose" onclick="dismissWhatsAppReminder()" title="Dismiss for today">✕</button>
-</div>
- 
 <script src="petbox.js"></script>
 </body>
 </html>

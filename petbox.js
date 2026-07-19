@@ -18,7 +18,7 @@
 
 
 
-  /* ===== BACKGROUND CANVAS ===== */
+/* ===== BACKGROUND CANVAS ===== */
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let W, H;
@@ -67,7 +67,6 @@
         }
       }
     }
-    if (typeof refreshWhatsAppReminders === 'function') refreshWhatsAppReminders();
   }
 
   /* ===== FOOTER YEAR ===== */
@@ -375,135 +374,3 @@
     document.getElementById('lightbox').classList.remove('open');
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-  /* ==========================================================================
-     WHATSAPP CARE REMINDER — vaccination & deworming due-date notifications
-     ==========================================================================
-     HOW TO SET THE OWNER'S CONTACT NUMBER (kept out of the page, not a visible
-     form field — only editable here in the JS file):
-       1. Country code + number, digits only, no "+", no spaces, no dashes.
-          e.g. Indian number 98765 43210  ->  "919876543210"
-       2. One page = one pet = one owner, so set it once below.
-     This number is never rendered into the DOM/HTML, so it isn't visible by
-     "view page source" inspection of the rendered content in normal use.
-     ========================================================================== */
-  const OWNER_WHATSAPP_NUMBER = '917300479727'; // <-- set the real owner number here
-
-  // How many days after the due date we keep offering the reminder before giving up
-  const WA_REMINDER_GRACE_DAYS = 14;
-  const LS_WA_SENT_PREFIX = `pawhouse_wa_sent_${PET_ID}_`; // + row key + date, per-day de-dupe
-  const LS_WA_DISMISS_PREFIX = `pawhouse_wa_dismiss_${PET_ID}_`; // + today's date, if user hits ✕
-
-  function todayIso() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  function rowKeyFor(row) {
-    const nameCell = row.querySelector('td');
-    const name = nameCell ? nameCell.textContent.trim().replace(/\s+/g, '-').toLowerCase() : 'item';
-    return `${row.dataset.remindType}-${name}`;
-  }
-
-  function isRowDoneToday(row) {
-    const pill = row.querySelector('.status-pill');
-    return pill && pill.classList.contains('done') && row.dataset.due === todayIso();
-  }
-
-  // Finds every vaccination/deworming row that is due today (register date),
-  // still pending (not marked Done), and not older than the grace window.
-  function findDueReminders() {
-    const rows = document.querySelectorAll('tr[data-remind-type][data-due]');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const due = [];
-
-    rows.forEach(row => {
-      const pill = row.querySelector('.status-pill');
-      if (!pill || pill.classList.contains('done')) return; // completed items don't need a nudge
-      if (isRowDoneToday(row)) return;
-
-      const dueDate = new Date(row.dataset.due + 'T00:00:00');
-      const diffDays = Math.round((today - dueDate) / (24 * 60 * 60 * 1000));
-      if (diffDays < 0) return; // not due yet
-      if (diffDays > WA_REMINDER_GRACE_DAYS) return; // stale — stop nagging after 2 weeks
-
-      const key = rowKeyFor(row);
-      const alreadySentToday = localStorage.getItem(LS_WA_SENT_PREFIX + key) === todayIso();
-      if (alreadySentToday) return;
-
-      const nameCell = row.querySelector('td');
-      due.push({
-        row,
-        key,
-        name: nameCell ? nameCell.textContent.trim() : 'Care item',
-        type: row.dataset.remindType === 'deworming' ? 'Deworming' : 'Vaccination',
-        due: row.dataset.due,
-        overdue: diffDays > 0
-      });
-    });
-
-    return due;
-  }
-
-  function buildReminderMessage(items) {
-    const petName = document.querySelector('.pet-hero-info h1');
-    const name = petName ? petName.textContent.trim() : 'your pet';
-    const lines = items.map(it => {
-      const status = it.overdue ? 'was due on' : 'is due today,';
-      return `• ${it.name} (${it.type}) ${status} ${formatIsoForMessage(it.due)}`;
-    });
-    return `Hi! This is a reminder from Paw House 🐾 for ${name}:\n\n${lines.join('\n')}\n\nPlease schedule a visit at your convenience. Reply here to book. 🐶🐱`;
-  }
-
-  function formatIsoForMessage(iso) {
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const [y, m, d] = iso.split('-').map(Number);
-    return `${String(d).padStart(2,'0')} ${months[m - 1]} ${y}`;
-  }
-
-  let pendingWaItems = [];
-
-  function refreshWhatsAppReminders() {
-    const banner = document.getElementById('waReminderBanner');
-    const textEl = document.getElementById('waReminderText');
-    if (!banner || !textEl) return;
-
-    const dismissedToday = localStorage.getItem(LS_WA_DISMISS_PREFIX + todayIso()) === '1';
-    pendingWaItems = findDueReminders();
-
-    if (pendingWaItems.length === 0 || dismissedToday) {
-      banner.classList.remove('show');
-      return;
-    }
-
-    const n = pendingWaItems.length;
-    textEl.textContent = n === 1
-      ? `🐾 ${pendingWaItems[0].name} (${pendingWaItems[0].type}) is due — send a reminder?`
-      : `🐾 ${n} care items due — send an owner reminder?`;
-    banner.classList.add('show');
-  }
-
-  function sendWhatsAppReminder() {
-    if (pendingWaItems.length === 0) return;
-    const message = buildReminderMessage(pendingWaItems);
-    const link = `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-
-    // Opening WhatsApp requires a real user click — browsers block silent/background
-    // sends for security, so this fires from the banner button tap, not automatically
-    // on page load. Once "set" (the number above), no on-screen field is needed again.
-    window.open(link, '_blank');
-
-    pendingWaItems.forEach(it => {
-      try { localStorage.setItem(LS_WA_SENT_PREFIX + it.key, todayIso()); } catch (e) {}
-    });
-    refreshWhatsAppReminders();
-  }
-
-  function dismissWhatsAppReminder() {
-    try { localStorage.setItem(LS_WA_DISMISS_PREFIX + todayIso(), '1'); } catch (e) {}
-    document.getElementById('waReminderBanner').classList.remove('show');
-  }
-
-  refreshWhatsAppReminders();
-  // Re-check once an hour in case the page is left open across midnight
-  setInterval(refreshWhatsAppReminders, 60 * 60 * 1000);
