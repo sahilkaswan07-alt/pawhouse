@@ -236,6 +236,26 @@
   let razorpayPaymentId = "";
 
   function startPayment() {
+
+
+
+
+    function startPayment() {
+
+  paymentVerified = true;
+  razorpayPaymentId = "TEST_PAYMENT";
+  submitRegistration();
+  return;
+
+  // Existing Razorpay code below...
+}
+
+
+
+
+
+
+
     document.getElementById('payWarning').style.display = 'none';
     const btn = document.getElementById('paidBtn');
     btn.disabled = true;
