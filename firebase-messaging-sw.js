@@ -18,3 +18,12 @@ messaging.onBackgroundMessage((payload) => {
     icon: "/icon-192.png"
   });
 });
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCkNU-b_ItnJhWTDNxwewuRG_DLBCGuCDk",
+  authDomain: "paw-house-7acb6.firebaseapp.com",
+  projectId: "paw-house-7acb6",
+  storageBucket: "paw-house-7acb6.firebasestorage.app",
+  messagingSenderId: "461862762380",
+  appId: "1:461862762380:web:3a51d5410857d5966a48a9"
+};
