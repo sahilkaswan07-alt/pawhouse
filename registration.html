@@ -204,26 +204,6 @@
   }
  
   function goToPayment() {
-
-
-
-paymentVerified = true;
-  razorpayPaymentId = "TEST_PAYMENT";
-  submitRegistration();
-  return;
-
-  // Existing Razorpay code below...
-}
-
-
-
-
-
-
-
-
-
-
     const data = validateStep1();
     if (!data) return;
     formData = data;
@@ -256,25 +236,19 @@ paymentVerified = true;
   let razorpayPaymentId = "";
 
   function startPayment() {
-
-
-
-
-    
-
-  paymentVerified = true;
-  razorpayPaymentId = "TEST_PAYMENT";
-  submitRegistration();
-  return;
-
-  // Existing Razorpay code below...
-}
-
-
-
-
-
-
+    /* ===== TEMPORARY PAYMENT BYPASS — REMOVE THIS BLOCK TO RE-ENABLE RAZORPAY ===== */
+    const BYPASS_PAYMENT = true;
+    if (BYPASS_PAYMENT) {
+      const btn = document.getElementById('paidBtn');
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+      document.getElementById('payStatusText').textContent = "✅ Payment step skipped (temporary) — completing registration...";
+      paymentVerified = true;
+      razorpayPaymentId = "BYPASSED_" + Date.now();
+      submitRegistration();
+      return;
+    }
+    /* ===== END TEMPORARY PAYMENT BYPASS ===== */
 
     document.getElementById('payWarning').style.display = 'none';
     const btn = document.getElementById('paidBtn');
@@ -334,64 +308,63 @@ paymentVerified = true;
     btn.textContent = "Sending...";
     status.classList.remove('error');
     status.textContent = "Sending registration details...";
- 
-    const payload = {
-      access_key: WEB3FORMS_ACCESS_KEY,
-      subject: `New Paw House Registration — ${formData.petName}`,
-      from_name: "Paw House Registration",
-      owner_name: formData.ownerName,
-      owner_contact: formData.ownerContact,
-      owner_email: formData.ownerEmail,
-      replyto: formData.ownerEmail,
-      pet_name: formData.petName,
-      pet_breed: formData.petBreed,
-      pet_sex: formData.petSex,
-      pet_age: formData.petAgeDisplay,
-      pet_photo: petPhotoDataUrl,   // base64 image (keep photos small — large payloads may be rejected)
-      to_email: RECEIVER_EMAIL,
-      fee_paid: "₹7",
-      razorpay_payment_id: razorpayPaymentId
-    };
 
+    try {
+      if (typeof window.saveUserToFirebase !== 'function') {
+        throw new Error("Still loading — please wait a second and tap Pay again.");
+      }
 
-const firebaseId = await window.saveUserToFirebase(
-    formData,
-    petPhotoDataUrl,
-    razorpayPaymentId
-);
+      const saveResult = await window.saveUserToFirebase(
+        formData,
+        petPhotoDataUrl,
+        razorpayPaymentId
+      );
 
-if(!firebaseId){
-    alert("Unable to save registration.");
-    return;
-}
+      if (!saveResult) {
+        throw new Error("Couldn't save to the database. Check Firebase rules/console.");
+      }
 
+      const { id: firebaseId, photoURL } = saveResult;
 
+      const payload = {
+        access_key: WEB3FORMS_ACCESS_KEY,
+        subject: `New Paw House Registration — ${formData.petName}`,
+        from_name: "Paw House Registration",
+        owner_name: formData.ownerName,
+        owner_contact: formData.ownerContact,
+        owner_email: formData.ownerEmail,
+        replyto: formData.ownerEmail,
+        pet_name: formData.petName,
+        pet_breed: formData.petBreed,
+        pet_sex: formData.petSex,
+        pet_age: formData.petAgeDisplay,
+        pet_photo: photoURL,   // hosted photo URL from Firebase Storage (not raw base64)
+        to_email: RECEIVER_EMAIL,
+        fee_paid: "₹7",
+        razorpay_payment_id: razorpayPaymentId,
+        firebase_id: firebaseId
+      };
 
-
-
-
-
-    fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          status.textContent = "";
-          goToStep(3);
-        } else {
-          throw new Error(result.message || "Send failed");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        status.classList.add('error');
-        status.textContent = "Couldn't send automatically. Please try again or contact us directly.";
-        btn.disabled = false;
-        btn.textContent = "Pay ₹7 Now";
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
       });
+      const result = await res.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Email send failed, but registration was saved to Firebase.");
+      }
+
+      status.textContent = "";
+      goToStep(3);
+    } catch (err) {
+      console.error("submitRegistration error:", err);
+      status.classList.add('error');
+      status.textContent = "Couldn't complete registration: " + err.message;
+      btn.disabled = false;
+      btn.textContent = "Pay ₹7 Now";
+    }
   }
 </script>
 <script type="module" src="js/firebase.js"></script>

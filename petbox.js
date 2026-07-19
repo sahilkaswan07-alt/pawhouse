@@ -374,3 +374,29 @@
     document.getElementById('lightbox').classList.remove('open');
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+
+
+
+
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCkNU-b_ItnJhWTDNxwewuRG_DLBCGuCDk",
+  authDomain: "paw-house-7acb6.firebaseapp.com",
+  projectId: "paw-house-7acb6",
+  storageBucket: "paw-house-7acb6.firebasestorage.app",
+  messagingSenderId: "461862762380",
+  appId: "1:461862762380:web:3a51d5410857d5966a48a9",
+  measurementId: "G-TC797W8ET5"
+};
+
+
+
+
+saveReminder({
+  ownerEmail,
+  petName,
+  type,
+  name,
+  dueDate
+});
