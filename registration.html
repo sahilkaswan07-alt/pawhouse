@@ -310,8 +310,24 @@
     status.textContent = "Sending registration details...";
 
     try {
+      // Wait for firebase.js to finish loading (poll up to ~5s) instead of failing instantly
       if (typeof window.saveUserToFirebase !== 'function') {
-        throw new Error("Still loading — please wait a second and tap Pay again.");
+        const ready = await new Promise((resolve) => {
+          let waited = 0;
+          const iv = setInterval(() => {
+            waited += 100;
+            if (typeof window.saveUserToFirebase === 'function') {
+              clearInterval(iv);
+              resolve(true);
+            } else if (waited >= 5000) {
+              clearInterval(iv);
+              resolve(false);
+            }
+          }, 100);
+        });
+        if (!ready) {
+          throw new Error("Payment system failed to load. Please refresh the page and try again.");
+        }
       }
 
       const saveResult = await window.saveUserToFirebase(
