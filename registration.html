@@ -40,6 +40,12 @@
         <input type="tel" name="ownerContact" placeholder="e.g. 98765 43210" autocomplete="tel">
         <div class="err">Please enter a valid 10-digit contact number.</div>
       </div>
+
+      <div class="field" id="f-ownerEmail">
+        <label>Owner Email</label>
+        <input type="email" name="ownerEmail" placeholder="e.g. sahil@example.com" autocomplete="email">
+        <div class="err">Please enter a valid email address.</div>
+      </div>
  
       <div class="field" id="f-petName">
         <label>Pet Name</label>
@@ -170,6 +176,7 @@
  
     if (!data.ownerName || data.ownerName.trim().length < 2) { setError('f-ownerName', true); ok = false; } else clearError('f-ownerName');
     if (!/^[0-9+\-\s]{7,15}$/.test(data.ownerContact || "")) { setError('f-ownerContact', true); ok = false; } else clearError('f-ownerContact');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.ownerEmail || "")) { setError('f-ownerEmail', true); ok = false; } else clearError('f-ownerEmail');
     if (!data.petName || data.petName.trim().length < 1) { setError('f-petName', true); ok = false; } else clearError('f-petName');
     if (!data.petBreed || data.petBreed.trim().length < 1) { setError('f-petBreed', true); ok = false; } else clearError('f-petBreed');
     if (data.petAge === "" || isNaN(data.petAge) || Number(data.petAge) < 0) { setError('f-petAge', true); ok = false; } else clearError('f-petAge');
@@ -204,6 +211,7 @@
     document.getElementById('summaryBox').innerHTML = `
       <div><span>Pet Name</span><span>${escapeHtml(data.petName)}</span></div>
       <div><span>Owner</span><span>${escapeHtml(data.ownerName)}</span></div>
+      <div><span>Owner Email</span><span>${escapeHtml(data.ownerEmail)}</span></div>
       <div><span>Pet Age</span><span>${escapeHtml(data.petAgeDisplay)}</span></div>
       <div class="total"><span>Registration Fee</span><span>₹7</span></div>
     `;
@@ -241,7 +249,8 @@
       description: `Registration fee - ${formData.petName}`,
       prefill: {
         name: formData.ownerName,
-        contact: formData.ownerContact
+        contact: formData.ownerContact,
+        email: formData.ownerEmail
       },
       theme: { color: "#ff7a1a" },
       handler: function (response) {
@@ -273,7 +282,7 @@
     rzp.open();
   }
 
-  function submitRegistration() {
+  async function submitRegistration() {
     if (!paymentVerified) {
       document.getElementById('payWarning').textContent = "Please complete the payment first.";
       document.getElementById('payWarning').style.display = 'block';
@@ -292,6 +301,8 @@
       from_name: "Paw House Registration",
       owner_name: formData.ownerName,
       owner_contact: formData.ownerContact,
+      owner_email: formData.ownerEmail,
+      replyto: formData.ownerEmail,
       pet_name: formData.petName,
       pet_breed: formData.petBreed,
       pet_sex: formData.petSex,
@@ -301,6 +312,24 @@
       fee_paid: "₹7",
       razorpay_payment_id: razorpayPaymentId
     };
+
+
+const firebaseId = await window.saveUserToFirebase(
+    formData,
+    petPhotoDataUrl,
+    razorpayPaymentId
+);
+
+if(!firebaseId){
+    alert("Unable to save registration.");
+    return;
+}
+
+
+
+
+
+
 
     fetch("https://api.web3forms.com/submit", {
       method: "POST",
@@ -325,5 +354,7 @@
       });
   }
 </script>
+<script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/register.js"></script>
 </body>
 </html>
