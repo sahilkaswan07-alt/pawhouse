@@ -204,6 +204,26 @@
   }
  
   function goToPayment() {
+
+
+
+paymentVerified = true;
+  razorpayPaymentId = "TEST_PAYMENT";
+  submitRegistration();
+  return;
+
+  // Existing Razorpay code below...
+}
+
+
+
+
+
+
+
+
+
+
     const data = validateStep1();
     if (!data) return;
     formData = data;
@@ -240,7 +260,7 @@
 
 
 
-    function startPayment() {
+    
 
   paymentVerified = true;
   razorpayPaymentId = "TEST_PAYMENT";
