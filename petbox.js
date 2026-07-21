@@ -1,11 +1,8 @@
-
-
-
-
-
-
-
-
+/* ===== petbox.js =====
+   Handles everything on this pet's page EXCEPT the Firestore vaccine sync,
+   which lives in the separate js/petbox-sync.js module (loaded with
+   type="module" in petbox.html) — that's where it belongs, since this file
+   is loaded as a plain script and can't contain `import` statements. */
 
 
 
@@ -39,43 +36,260 @@
   resize(); init(); animate();
   window.addEventListener('resize',()=>{ resize(); init(); });
  
+  /* ===== PET ID — read from window.PET_ID, which each pet's own HTML page
+     sets in a tiny inline <script> tag right before this file is loaded,
+     e.g.  <script>window.PET_ID = 'monty';</script>
+     This is what makes it possible to use this ONE shared petbox.js file
+     for every pet, instead of duplicating hundreds of lines of JS per pet
+     (which is how the last bug happened). Falls back to 'bruno' only if a
+     page forgets to set it. ===== */
+  const PET_ID = window.PET_ID || 'bruno';
+
+  /* ===== STATUS PERSISTENCE — saved per item-id so a click survives a
+     reload, and so home.html (reading this same key) can drop that
+     reminder from its bell/badge too. ===== */
+  const STATUS_STORE_KEY = `pawhouse_status_${PET_ID}`;
+
+  function loadStatusOverrides() {
+    try {
+      const raw = localStorage.getItem(STATUS_STORE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function saveStatusOverride(itemId, data) {
+    try {
+      const all = loadStatusOverrides();
+      all[itemId] = data;
+      localStorage.setItem(STATUS_STORE_KEY, JSON.stringify(all));
+    } catch (e) { /* storage unavailable — change won't persist across reloads */ }
+  }
+
+  // Runs once on page load, before the reminder bell/popup are computed,
+  // so any previously-saved status (e.g. marked Done last visit) is back
+  // in place immediately instead of resetting to the hardcoded HTML state.
+  function applyStatusOverrides() {
+    const overrides = loadStatusOverrides();
+    document.querySelectorAll('tr[data-item-id]').forEach(row => {
+      const saved = overrides[row.dataset.itemId];
+      if (!saved) return;
+      const pill = row.querySelector('.status-pill');
+      const dateCell = row.querySelector('.col-date');
+      if (!pill) return;
+      pill.classList.remove('done', 'due', 'miss');
+      pill.classList.add(saved.cls);
+      pill.textContent = saved.cls === 'done' ? 'Done' : (saved.cls === 'miss' ? 'Missed' : 'Due');
+      pill.title = saved.cls === 'done' ? 'Tap to update' : 'Tap to mark as done';
+      if (saved.due) row.setAttribute('data-due', saved.due);
+      if (dateCell && saved.dateText) dateCell.textContent = saved.dateText;
+    });
+  }
+
   /* ===== STATUS PILL — tap to mark done / undo ===== */
   function cycleStatus(el) {
     const row = el.closest('tr');
     const dateCell = row ? row.querySelector('.col-date') : null;
+    let newCls, newDue, newDateText;
     if (el.classList.contains('done')) {
       // Undo — revert back to Due
       el.classList.remove('done');
       el.classList.add('due');
       el.textContent = 'Due';
       el.title = 'Tap to mark as done';
+      newCls = 'due';
+      newDue = row ? row.getAttribute('data-due') : null;
+      newDateText = dateCell ? dateCell.textContent : null;
     } else {
       // Mark as Done — stamp today's date
       el.classList.remove('due', 'miss');
       el.classList.add('done');
       el.textContent = 'Done';
       el.title = 'Tap to update';
+      newCls = 'done';
       if (dateCell) {
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
-        dateCell.textContent = `${dd} ${months[today.getMonth()]} ${today.getFullYear()}`;
+        newDateText = `${dd} ${months[today.getMonth()]} ${today.getFullYear()}`;
+        dateCell.textContent = newDateText;
         // Keep the hidden due-date in sync so a completed item stops triggering reminders
-        if (row) {
-          const iso = today.toISOString().slice(0, 10);
-          row.setAttribute('data-due', iso);
-        }
+        newDue = today.toISOString().slice(0, 10);
+        if (row) row.setAttribute('data-due', newDue);
       }
     }
+    // Persist this change — survives reload, and lets home.html pick it up too
+    if (row && row.dataset.itemId) {
+      saveStatusOverride(row.dataset.itemId, { cls: newCls, due: newDue, dateText: newDateText });
+    }
+    // Keep the bell badge in sync whenever a status changes
+    renderReminderBell();
   }
+
+  /* ===== REMINDER BELL + POPUP — vaccine / deworming due & missed alerts =====
+     Works like a cart badge: the bell shows a count of items needing attention.
+     Tapping it opens a popup listing each one. If something is due TODAY,
+     the popup also opens automatically once per day. */
+
+  const REMINDER_TYPE_META = {
+    vaccination: { icon: '💉', label: 'Vaccination' },
+    deworming:   { icon: '🐛', label: 'Deworming' }
+  };
+
+  function todayISO() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function formatReminderDate(iso) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) return iso;
+    return `${String(d).padStart(2, '0')} ${months[m - 1]} ${y}`;
+  }
+
+  // Collects every vaccination/deworming row that isn't marked "Done"
+  function collectReminderItems() {
+    const rows = document.querySelectorAll('tr[data-remind-type][data-due]');
+    const today = todayISO();
+    const items = [];
+    rows.forEach(row => {
+      const pill = row.querySelector('.status-pill');
+      if (!pill || pill.classList.contains('done')) return; // ignore completed items
+      const nameCell = row.querySelector('td');
+      const type = row.dataset.remindType;
+      const meta = REMINDER_TYPE_META[type] || { icon: '📌', label: type };
+      const due = row.dataset.due;
+      const isMissed = pill.classList.contains('miss') || (due && due < today);
+      items.push({
+        type,
+        icon: meta.icon,
+        label: meta.label,
+        name: nameCell ? nameCell.textContent.trim() : meta.label,
+        due,
+        isDueToday: due === today,
+        isMissed
+      });
+    });
+    // Soonest / most overdue first
+    items.sort((a, b) => (a.due || '').localeCompare(b.due || ''));
+    return items;
+  }
+
+  // NOTE: home.html now reads the same STATUS_STORE_KEY (pawhouse_status_<petId>)
+  // written by saveStatusOverride() above to know which items are Done —
+  // no separate summary key needed here anymore.
+
+  /* ===== SCHEDULE TABLE — built from the shared pet-schedules.js data =====
+     Fills the Vaccination / Deworming tables from window.PET_SCHEDULES
+     (loaded via pet-schedules.js, see that file) instead of relying on
+     hand-typed <tr> rows in this pet's HTML. This is also exactly what
+     home.html reads to build its bell, so the two can never fall out of
+     sync — edit a due date once, in pet-schedules.js, and it updates
+     everywhere. If a pet has no entry in pet-schedules.js yet, whatever
+     rows are already hardcoded in the HTML are left alone. */
+  function buildScheduleRow(item, type) {
+    const cls = item.status === 'done' ? 'done' : (item.status === 'miss' ? 'miss' : 'due');
+    const label = cls === 'done' ? 'Done' : (cls === 'miss' ? 'Missed' : 'Due');
+    const title = cls === 'done' ? 'Tap to update' : 'Tap to mark as done';
+    return `<tr data-remind-type="${type}" data-due="${item.due}" data-item-id="${item.id}">
+      <td>${item.name}</td>
+      <td><span class="status-pill ${cls}" onclick="cycleStatus(this)" title="${title}">${label}</span></td>
+      <td class="col-date">${formatReminderDate(item.due)}</td>
+    </tr>`;
+  }
+
+  function renderScheduleTables() {
+    const data = window.PET_SCHEDULES && window.PET_SCHEDULES[PET_ID];
+    if (!data) return; // no shared data for this pet yet — keep hardcoded HTML rows as-is
+    const vaxBody = document.getElementById('vaxTbody');
+    const dewBody = document.getElementById('dewTbody');
+    if (vaxBody && data.vaccination) {
+      vaxBody.innerHTML = data.vaccination.map(item => buildScheduleRow(item, 'vaccination')).join('');
+    }
+    if (dewBody && data.deworming) {
+      dewBody.innerHTML = data.deworming.map(item => buildScheduleRow(item, 'deworming')).join('');
+    }
+  }
+
+  function renderReminderBell() {
+    const items = collectReminderItems();
+    const bell = document.getElementById('reminderBell');
+    const badge = document.getElementById('reminderBadge');
+
+    if (!bell || !badge) return items;
+
+    if (items.length > 0) {
+      badge.style.display = 'flex';
+      badge.textContent = items.length > 9 ? '9+' : String(items.length);
+      bell.classList.toggle('has-due', items.some(i => i.isDueToday || i.isMissed));
+    } else {
+      badge.style.display = 'none';
+      bell.classList.remove('has-due');
+    }
+    return items;
+  }
+
+  function renderReminderModalContent(items) {
+    const sub = document.getElementById('reminderModalSub');
+    const list = document.getElementById('reminderModalList');
+    if (!sub || !list) return;
+
+    if (items.length === 0) {
+      sub.textContent = "You're all caught up — nothing due right now.";
+      list.innerHTML = '<div class="reminder-empty">🎉 No pending vaccinations or deworming.</div>';
+      return;
+    }
+
+    sub.textContent = `${items.length} item${items.length > 1 ? 's' : ''} need${items.length > 1 ? '' : 's'} your attention.`;
+    list.innerHTML = items.map(item => `
+      <div class="reminder-item">
+        <div class="reminder-item-icon">${item.icon}</div>
+        <div class="reminder-item-info">
+          <div class="reminder-item-name">${item.label}: ${item.name}</div>
+          <div class="reminder-item-date">${item.isMissed ? 'Was due' : 'Due'} ${formatReminderDate(item.due)}</div>
+        </div>
+        <div class="reminder-item-status ${item.isMissed ? 'miss' : 'due'}">${item.isMissed ? 'Missed' : 'Due'}</div>
+      </div>
+    `).join('');
+  }
+
+  function openReminderModal() {
+    const items = collectReminderItems();
+    renderReminderModalContent(items);
+    document.getElementById('reminderModalOverlay').classList.add('open');
+  }
+
+  function closeReminderModal() {
+    document.getElementById('reminderModalOverlay').classList.remove('open');
+  }
+
+  // Auto-popup: if something is due TODAY (or already missed) and we haven't
+  // shown it yet today, pop it open automatically like a cart confirmation.
+  function maybeAutoShowReminder() {
+    const items = collectReminderItems();
+    const urgent = items.filter(i => i.isDueToday || i.isMissed);
+    if (urgent.length === 0) return;
+
+    const shownKey = `pawhouse_reminder_shown_${PET_ID}_${todayISO()}`;
+    if (localStorage.getItem(shownKey)) return; // already shown today
+
+    renderReminderModalContent(items);
+    document.getElementById('reminderModalOverlay').classList.add('open');
+    try { localStorage.setItem(shownKey, '1'); } catch (e) { /* ignore */ }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReminderModal(); });
+
+  renderScheduleTables(); // build rows from pet-schedules.js (if this pet has an entry there)
+  applyStatusOverrides(); // restore any previously-saved Done state before counting
+  renderReminderBell();
+  // Slight delay so it doesn't collide with the page's entrance animation
+  setTimeout(maybeAutoShowReminder, 600);
 
   /* ===== FOOTER YEAR ===== */
   document.getElementById('year').textContent = new Date().getFullYear();
 
   /* ===== OWNER GALLERY UPLOAD — 1 photo every 15 days ===== */
-  // Change this if you reuse this file for another pet, so each pet's
-  // upload history + cooldown is tracked separately in the browser.
-  const PET_ID = 'bruno';
+  // (PET_ID is declared once, near the top of this file, above.)
   const UPLOAD_COOLDOWN_DAYS = 15;
   const UPLOAD_COOLDOWN_MS = UPLOAD_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
   const LS_PHOTOS_KEY = `pawhouse_gallery_${PET_ID}`;
@@ -374,29 +588,3 @@
     document.getElementById('lightbox').classList.remove('open');
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-
-
-
-
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCkNU-b_ItnJhWTDNxwewuRG_DLBCGuCDk",
-  authDomain: "paw-house-7acb6.firebaseapp.com",
-  projectId: "paw-house-7acb6",
-  storageBucket: "paw-house-7acb6.firebasestorage.app",
-  messagingSenderId: "461862762380",
-  appId: "1:461862762380:web:3a51d5410857d5966a48a9",
-  measurementId: "G-TC797W8ET5"
-};
-
-
-
-
-saveReminder({
-  ownerEmail,
-  petName,
-  type,
-  name,
-  dueDate
-});

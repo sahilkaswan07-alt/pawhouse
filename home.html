@@ -1,4 +1,3 @@
-
 Home · HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -9,6 +8,36 @@ Home · HTML
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="home.css">
+  <style>
+    /* ===== CARE REMINDER BELL — mirrors the bell on each pet's own page.
+       Counted LIVE from the hidden <span> list inside each pet-box below
+       (see "CARE REMINDER DATA" comments), NOT from localStorage — that
+       way it's always correct even if that pet's own page was never
+       opened on this device. Keep each pet's list in sync with the
+       vaccination/deworming rows in their petbox.html: delete a <span>
+       here the moment that row is marked Done there. ===== */
+    .pet-box{ position:relative; }
+    .care-bell{
+      position:absolute; top:10px; right:10px; z-index:5;
+      width:34px; height:34px; border-radius:50%;
+      background:#1b1e27; border:1.5px solid rgba(244,162,77,.4);
+      display:none; align-items:center; justify-content:center;
+      font-size:16px; box-shadow:0 4px 12px rgba(0,0,0,.35);
+    }
+    .care-bell.show{ display:flex; }
+    .care-bell.has-due{ animation:careBellPulse 1.6s ease-in-out infinite; }
+    @keyframes careBellPulse{
+      0%,100%{ box-shadow:0 4px 12px rgba(0,0,0,.35), 0 0 0 0 rgba(224,90,90,.45); }
+      50%{ box-shadow:0 4px 12px rgba(0,0,0,.35), 0 0 0 7px rgba(224,90,90,0); }
+    }
+    .care-bell-badge{
+      position:absolute; top:-4px; right:-4px; min-width:17px; height:17px;
+      padding:0 4px; border-radius:9px; background:#e05a5a; color:#fff;
+      font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      border:2px solid #0d0f14;
+    }
+  </style>
 </head>
 <body>
  
@@ -33,8 +62,19 @@ Home · HTML
     </div>
     <div class="pets-grid">
  
-      <!-- ===================== PET BOX — copy & paste this block for each new pet ===================== -->
-      <div class="pet-box" onclick="openBox('bruno123', 'petbox.html?id=bruno')">
+      <!-- ===================== PET BOX — copy & paste this block for each new pet =====================
+           To add a new pet:
+             1. Copy this block.
+             2. Replace every "bruno" below with the new pet's id — that's
+                data-pet-id, the openBox(...) args, and the two bell
+                element ids (careBell-bruno / careBellBadge-bruno).
+             3. Update photo/name/breed/chips further down.
+             4. Add that same id as a new entry in pet-schedules.js.
+           The bell itself needs NO manual editing beyond renaming those
+           two ids — its count is read live from pet-schedules.js, the
+           same file the pet's own petbox page reads from. -->
+      <div class="pet-box" data-pet-id="bruno" onclick="openBox('bruno123', 'petbox.html?id=bruno')">
+        <div class="care-bell" id="careBell-bruno" title="Care reminder">🔔<span class="care-bell-badge" id="careBellBadge-bruno">0</span></div>
         <img class="pet-photo" src="bruno.png" alt="Bruno">
         <div class="pet-info">
           <div class="pet-name">Bruno</div>
@@ -51,72 +91,9 @@ Home · HTML
 
 
 
- <!-- ===================== PET BOX — copy & paste this block for each new pet ===================== -->
-      <div class="pet-box" onclick="openBox('monty123', 'petbox.html?id=monty')">
-        <img class="pet-photo" src="monty.png" alt="Monty">
-        <div class="pet-info">
-          <div class="pet-name">Monty</div>
-          <div class="pet-breed">Pit-Bull</div>
-          <div class="pet-meta">
-            <span class="pet-chip sex">Male</span>
-            <span class="pet-chip age">2 yrs</span>
-          </div>
-          <div class="lock-btn">🔒 Open Box</div>
-        </div>
-      </div>
-      <!-- ============================================================================================== -->
 
 
 
-
- <!-- ===================== PET BOX — copy & paste this block for each new pet ===================== -->
-      <div class="pet-box" onclick="openBox('caty123', 'petbox.html?id=caty')">
-        <img class="pet-photo" src="caty.png" alt="Caty">
-        <div class="pet-info">
-          <div class="pet-name">Caty</div>
-          <div class="pet-breed">Siamese</div>
-          <div class="pet-meta">
-            <span class="pet-chip sex">Female</span>
-            <span class="pet-chip age">1 yr</span>
-          </div>
-          <div class="lock-btn">🔒 Open Box</div>
-        </div>
-      </div>
-      <!-- ============================================================================================== -->
-
-
- <!-- ===================== PET BOX — copy & paste this block for each new pet ===================== -->
-      <div class="pet-box" onclick="openBox('bomby123', 'petbox.html?id=bomby')">
-        <img class="pet-photo" src="bomby.png" alt="Bomby">
-        <div class="pet-info">
-          <div class="pet-name">Bomby</div>
-          <div class="pet-breed">Labrador</div>
-          <div class="pet-meta">
-            <span class="pet-chip sex">Male</span>
-            <span class="pet-chip age">2 yrs</span>
-          </div>
-          <div class="lock-btn">🔒 Open Box</div>
-        </div>
-      </div>
-      <!-- ============================================================================================== -->
-
-
-
-
- <!-- ===================== PET BOX — copy & paste this block for each new pet ===================== -->
-      <div class="pet-box" onclick="openBox('pili123', 'petbox.html?id=pili')">
-        <img class="pet-photo" src="pili.png" alt="Pili">
-        <div class="pet-info">
-          <div class="pet-name">Pili</div>
-          <div class="pet-breed"> Maine Coon</div>
-          <div class="pet-meta">
-            <span class="pet-chip sex">Female</span>
-            <span class="pet-chip age">2 yrs</span>
-          </div>
-          <div class="lock-btn">🔒 Open Box</div>
-        </div>
-      </div>
-      <!-- ============================================================================================== -->
 
 
 
@@ -142,6 +119,7 @@ Home · HTML
     </div>
   </div>
  
+<script src="pet-schedules.js"></script>
 <script>
   /* ===== BACKGROUND CANVAS ===== */
   const canvas = document.getElementById('bg-canvas');
@@ -166,6 +144,72 @@ Home · HTML
  
   /* ===== FOOTER YEAR ===== */
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ===== CARE REMINDER BELLS =====
+     Fully automatic — no per-pet data to maintain in this file anymore.
+
+     1. Which pets exist is read straight from the DOM: every
+        `.pet-box[data-pet-id]` on the page (so a newly copy-pasted pet
+        box is picked up with zero extra JS/HTML edits here).
+     2. Each pet's vaccination/deworming items come from
+        window.PET_SCHEDULES (pet-schedules.js) — the SAME file that pet's
+        own petbox page reads from, so the two can never disagree.
+     3. Anything the owner has tapped "Done" on that pet's own petbox page
+        is read from the same "pawhouse_status_<petId>" localStorage key
+        that page writes to, and subtracted here — so completing it there
+        removes it from the home page bell too, without editing this file. */
+
+  function loadStatusOverrides(petId) {
+    try {
+      const raw = localStorage.getItem(`pawhouse_status_${petId}`);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // Merges pet-schedules.js baseline data with any localStorage overrides,
+  // then returns just the items that are still pending (not "done").
+  function getPendingItems(petId) {
+    const schedule = window.PET_SCHEDULES && window.PET_SCHEDULES[petId];
+    if (!schedule) return [];
+    const overrides = loadStatusOverrides(petId);
+    const all = [...(schedule.vaccination || []), ...(schedule.deworming || [])];
+    return all
+      .map(item => {
+        const saved = overrides[item.id];
+        return saved ? { ...item, status: saved.cls } : item;
+      })
+      .filter(item => item.status !== 'done');
+  }
+
+  function renderCareBells() {
+    document.querySelectorAll('.pet-box[data-pet-id]').forEach(box => {
+      const id = box.dataset.petId;
+      const bell = document.getElementById(`careBell-${id}`);
+      const badge = document.getElementById(`careBellBadge-${id}`);
+      if (!bell || !badge) return;
+
+      const items = getPendingItems(id);
+      const count = items.length;
+      const urgent = items.some(item => item.status === 'due' || item.status === 'miss');
+
+      if (count > 0) {
+        bell.classList.add('show');
+        bell.classList.toggle('has-due', urgent);
+        badge.textContent = count > 9 ? '9+' : String(count);
+      } else {
+        // No pending items left for this pet — bell disappears
+        bell.classList.remove('show', 'has-due');
+      }
+    });
+  }
+
+  renderCareBells();
+  // Pick up a status change made on a pet's own page in another tab, and
+  // re-check whenever this tab regains focus.
+  window.addEventListener('storage', renderCareBells);
+  window.addEventListener('focus', renderCareBells);
  
   /* ===== PASSWORD MODAL ===== */
   let _pass = '', _url = '';
@@ -192,5 +236,6 @@ Home · HTML
     if (e.key === 'Enter') tryUnlock();
   });
 </script>
+<script src="petschedules.js"></script>
 </body>
 </html>

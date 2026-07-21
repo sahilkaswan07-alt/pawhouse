@@ -125,9 +125,88 @@
      }
      .bcs-history-row span.bcs-h-cat{ color:rgba(255,255,255,.5); }
 
+     /* ===== REMINDER BELL + POPUP (vaccine / deworming due alerts) ===== */
+     .reminder-bell{
+       position:fixed; top:84px; right:22px; z-index:500;
+       width:50px; height:50px; border-radius:50%;
+       background:#1b1e27; border:1.5px solid rgba(244,162,77,.4);
+       display:flex; align-items:center; justify-content:center;
+       font-size:22px; cursor:pointer; user-select:none;
+       box-shadow:0 4px 14px rgba(0,0,0,.35);
+       transition:transform .15s ease, filter .15s ease, border-color .15s ease;
+     }
+     .reminder-bell:hover{ filter:brightness(1.15); transform:scale(1.06); border-color:rgba(244,162,77,.85); }
+     .reminder-bell:active{ transform:scale(0.94); }
+     .reminder-bell.has-due{ animation:reminderPulse 1.6s ease-in-out infinite; }
+     @keyframes reminderPulse{
+       0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,.35), 0 0 0 0 rgba(224,90,90,.45); }
+       50%{ box-shadow:0 4px 14px rgba(0,0,0,.35), 0 0 0 8px rgba(224,90,90,0); }
+     }
+     .reminder-badge{
+       position:absolute; top:-4px; right:-4px; min-width:20px; height:20px;
+       padding:0 5px; border-radius:10px; background:#e05a5a; color:#fff;
+       font-family:'Inter',sans-serif; font-size:11.5px; font-weight:700;
+       display:flex; align-items:center; justify-content:center;
+       border:2px solid #0d0f14;
+     }
+
+     .reminder-modal-overlay{
+       position:fixed; inset:0; background:rgba(8,9,13,.72);
+       display:none; align-items:center; justify-content:center;
+       z-index:600; padding:20px; backdrop-filter:blur(2px);
+     }
+     .reminder-modal-overlay.open{ display:flex; }
+     .reminder-modal{
+       width:100%; max-width:420px; max-height:80vh; overflow-y:auto;
+       background:#161922; border:1px solid rgba(244,162,77,.35);
+       border-radius:16px; padding:24px 22px; position:relative;
+       box-shadow:0 20px 60px rgba(0,0,0,.5);
+     }
+     .reminder-modal-close{
+       position:absolute; top:14px; right:14px; width:30px; height:30px;
+       border-radius:50%; border:none; background:rgba(255,255,255,.08);
+       color:#fff; font-size:15px; cursor:pointer;
+       transition:background .15s ease;
+     }
+     .reminder-modal-close:hover{ background:rgba(255,255,255,.18); }
+     .reminder-modal-title{
+       font-family:'Playfair Display',serif; font-weight:900; font-size:19px;
+       color:#fff; margin-bottom:4px; padding-right:24px;
+     }
+     .reminder-modal-sub{
+       font-family:'Inter',sans-serif; font-size:12.5px; color:rgba(255,255,255,.55);
+       margin-bottom:16px;
+     }
+     .reminder-item{
+       display:flex; align-items:center; gap:12px;
+       background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+       border-radius:12px; padding:12px 14px; margin-bottom:10px;
+     }
+     .reminder-item-icon{ font-size:20px; line-height:1; }
+     .reminder-item-info{ flex:1; min-width:0; }
+     .reminder-item-name{
+       font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px; color:#fff;
+     }
+     .reminder-item-date{
+       font-family:'Inter',sans-serif; font-size:12px; color:rgba(255,255,255,.55); margin-top:2px;
+     }
+     .reminder-item-status{
+       font-family:'Inter',sans-serif; font-weight:700; font-size:11px;
+       padding:4px 10px; border-radius:20px; white-space:nowrap; text-transform:uppercase; letter-spacing:.03em;
+     }
+     .reminder-item-status.due{ background:rgba(244,162,77,.18); color:#f4a24d; }
+     .reminder-item-status.miss{ background:rgba(224,90,90,.18); color:#e05a5a; }
+     .reminder-empty{
+       font-family:'Inter',sans-serif; font-size:13.5px; color:rgba(255,255,255,.6);
+       text-align:center; padding:20px 0;
+     }
    </style>
 </head> 
-<body>
+<body data-reg-id="PASTE_FIRESTORE_DOC_ID_HERE">
+    <!-- ↑ IMPORTANT: replace PASTE_FIRESTORE_DOC_ID_HERE with this pet's
+         document ID from Firebase Console → Firestore → registrations
+         collection. Do this once each time you duplicate this file for a
+         new pet — without it, vaccine reminder emails can't be sent. -->
     <canvas id="bg-canvas"></canvas>
  
 <!-- NAVBAR -->
@@ -135,6 +214,22 @@
   <a href="home.html" class="nav-logo">🐾 Paw House</a>
   <a href="home.html" class="nav-back">← Back to Pets</a>
 </nav>
+
+<!-- REMINDER BELL — shows a badge count (like a cart) of due/missed vaccine & deworming items -->
+<div class="reminder-bell" id="reminderBell" onclick="openReminderModal()" title="Care reminders">
+  🔔
+  <span class="reminder-badge" id="reminderBadge" style="display:none;">0</span>
+</div>
+
+<!-- REMINDER POPUP -->
+<div class="reminder-modal-overlay" id="reminderModalOverlay" onclick="if(event.target===this) closeReminderModal();">
+  <div class="reminder-modal">
+    <button class="reminder-modal-close" onclick="closeReminderModal()">✕</button>
+    <div class="reminder-modal-title">🐾 Care Reminders</div>
+    <div class="reminder-modal-sub" id="reminderModalSub"></div>
+    <div class="reminder-modal-list" id="reminderModalList"></div>
+  </div>
+</div>
  
 <div class="page">
  
@@ -155,6 +250,11 @@
  
   <!-- ② VACCINATION SCHEDULE — edit rows per pet -->
  
+  <!-- These rows are auto-replaced at load time from this pet's entry in
+       pet-schedules.js (window.PET_ID = 'bruno' above tells it which entry
+       to use). Add/edit vaccines there — not here — and this table AND the
+       home.html bell both update automatically. The hardcoded rows below
+       only show up if this pet has no entry yet in pet-schedules.js. -->
   <div class="sec">
     <div class="sec-title"><span class="icon">💉</span> Vaccination Schedule</div>
     <table class="sched-table">
@@ -165,29 +265,31 @@
           <th class="col-date">Date</th>
         </tr>
       </thead>
-      <tbody>
-        <tr data-remind-type="vaccination" data-due="2024-01-12">
+      <tbody id="vaxTbody">
+        <tr data-remind-type="vaccination" data-due="2026-07-21" data-item-id="vax-dhppi">
           <td>DHPPi (Core Vaccine)</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
-          <td class="col-date">12 Jan 2024</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <tr data-remind-type="vaccination" data-due="2024-07-18">
+        <tr data-remind-type="vaccination" data-due="2026-07-21" data-item-id="vax-rabies">
           <td>Rabies</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
-          <td class="col-date">18 Jul 2026</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <tr data-remind-type="vaccination" data-due="2026-07-19">
+        <tr data-remind-type="vaccination" data-due="2026-07-21" data-item-id="vax-lepto">
           <td>Leptospirosis</td>
           <td><span class="status-pill due" onclick="cycleStatus(this)" title="Tap to mark as done">Due</span></td>
-          <td class="col-date">19 Jul 2026</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <tr data-remind-type="vaccination" data-due="2025-03-01">
+        <tr data-remind-type="vaccination" data-due="2026-07-21" data-item-id="vax-booster">
           <td>Booster Dose</td>
           <td><span class="status-pill miss" onclick="cycleStatus(this)" title="Tap to mark as done">Missed</span></td>
-          <td class="col-date">01 Mar 2025</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown:
-        <tr data-remind-type="vaccination" data-due="YYYY-MM-DD">
+        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown,
+             and give each a unique data-item-id (used to persist Done status and to
+             match the <span> in that pet's card on home.html):
+        <tr data-remind-type="vaccination" data-due="YYYY-MM-DD" data-item-id="vax-unique-id">
           <td>Vaccine Name</td>
           <td><span class="status-pill due">Due</span></td>
           <td class="col-date">DD Mon YYYY</td>
@@ -197,7 +299,8 @@
     </table>
   </div>
  
-  <!-- ③ DEWORMING SCHEDULE — edit rows per pet -->
+  <!-- ③ DEWORMING SCHEDULE — auto-replaced from pet-schedules.js, same as
+       the Vaccination table above. Edit due dates/status there. -->
   <div class="sec">
     <div class="sec-title"><span class="icon">🐛</span> Deworming Schedule</div>
     <table class="sched-table">
@@ -208,24 +311,25 @@
           <th class="col-date">Date</th>
         </tr>
       </thead>
-      <tbody>
-        <tr data-remind-type="deworming" data-due="2024-02-10">
+      <tbody id="dewTbody">
+        <tr data-remind-type="deworming" data-due="2026-07-21" data-item-id="dew-1st">
           <td>1st Deworming</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
-          <td class="col-date">10 Feb 2024</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <tr data-remind-type="deworming" data-due="2024-05-10">
+        <tr data-remind-type="deworming" data-due="2026-07-21" data-item-id="dew-2nd">
           <td>2nd Deworming</td>
           <td><span class="status-pill done" onclick="cycleStatus(this)" title="Tap to update">Done</span></td>
-          <td class="col-date">10 May 2024</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <tr data-remind-type="deworming" data-due="2025-08-10">
+        <tr data-remind-type="deworming" data-due="2026-07-21" data-item-id="dew-quarterly">
           <td>Quarterly Deworming</td>
           <td><span class="status-pill due" onclick="cycleStatus(this)" title="Tap to mark as done">Due</span></td>
-          <td class="col-date">10 Aug 2025</td>
+          <td class="col-date">21 Jul 2026</td>
         </tr>
-        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown:
-        <tr data-remind-type="deworming" data-due="YYYY-MM-DD">
+        <!-- Add more rows — set data-due to the YYYY-MM-DD version of the date shown,
+             and give each a unique data-item-id:
+        <tr data-remind-type="deworming" data-due="YYYY-MM-DD" data-item-id="dew-unique-id">
           <td>Treatment Name</td>
           <td><span class="status-pill due">Due</span></td>
           <td class="col-date">DD Mon YYYY</td>
@@ -396,7 +500,10 @@
 <!-- GALLERY UPLOAD TOAST -->
 <div class="gallery-toast" id="galleryToast"></div>
 
+<script>window.PET_ID = 'bruno';</script>
+<script src="petschedules.js"></script>
 <script src="petbox.js"></script>
 <script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/petbox-sync.js"></script>
 </body>
 </html>
